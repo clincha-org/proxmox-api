@@ -19,3 +19,34 @@ I've hit an issue where I keep getting `401 No ticket` as a response. I think th
 It wasn't the issue... the issue was that I had a `/` at the end of the request. So instead of `access/ticket` it was `access/ticket/`. I hate computers sometimes.
 
 Got some basic tests in place for authentication. Not sure that I like the current implementation, but we can grow from here. I think the next stage is going to be connecting everything back up to the terraform provider. I also want to get the vagrant machines built into the tests so that I don't need to spin them up separately. A GitHub workflow that runs the tests on commit would be another good step.
+
+
+---
+
+I have connected the Proxmox provider up to this API and done a dummy node datasource. I know that it can log in and connect everything together successfully. It's nice to see the terraform output as green.
+
+```text
+/usr/bin/terraform plan
+╷
+│ Warning: Provider development overrides are in effect
+│ 
+│ The following provider development overrides are set in the CLI
+│ configuration:
+│  - hashicorp.com/edu/proxmox in /home/clincha/go/bin
+│ 
+│ The behavior may therefore not match any released version of the provider
+│ and applying changes may cause the state to become incompatible with
+│ published releases.
+╵
+data.proxmox_node.example: Reading...
+data.proxmox_node.example: Read complete after 0s
+
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration
+and found no differences, so no changes are needed.
+
+Process finished with exit code 0
+```
+
+---
