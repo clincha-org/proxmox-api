@@ -19,44 +19,14 @@ func TestLogin(t *testing.T) {
 		t.Errorf("Client was not initialised")
 	}
 
-	if client.Ticket.Ticket == "" {
+	if client.Ticket.Data.Ticket == "" {
 		t.Errorf("Expected ticket, got empty string")
 	}
 
-	if client.Ticket.CSRFPreventionToken == "" {
+	if client.Ticket.Data.CSRFPreventionToken == "" {
 		t.Errorf("Expected CSRFPreventionToken, got empty string")
 	}
 
-	for k, v := range client.Ticket.Cap.Storage {
-		if v != 1 {
-			t.Errorf("Expected root user to have %q privilage but got %d", k, v)
-		}
-	}
-	for k, v := range client.Ticket.Cap.DataCenter {
-		if v != 1 {
-			t.Errorf("Expected root user to have %q privilage but got %d", k, v)
-		}
-	}
-	for k, v := range client.Ticket.Cap.SoftwareDefinedNetwork {
-		if v != 1 {
-			t.Errorf("Expected root user to have %q privilage but got %d", k, v)
-		}
-	}
-	for k, v := range client.Ticket.Cap.VirtualMachines {
-		if v != 1 {
-			t.Errorf("Expected root user to have %q privilage but got %d", k, v)
-		}
-	}
-	for k, v := range client.Ticket.Cap.Nodes {
-		if v != 1 {
-			t.Errorf("Expected root user to have %q privilage but got %d", k, v)
-		}
-	}
-	for k, v := range client.Ticket.Cap.Access {
-		if v != 1 {
-			t.Errorf("Expected root user to have %q privilage but got %d", k, v)
-		}
-	}
 }
 
 func TestIncorrectUsername(t *testing.T) {

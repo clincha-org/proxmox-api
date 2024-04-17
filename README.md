@@ -50,3 +50,9 @@ Process finished with exit code 0
 ```
 
 ---
+
+I am now implementing a data source. I've added some of the code to the provider but I now need to implement a "GetNodes" function for it to call. 
+
+I've added the code now. IntelliJ has a cool thing that when I paste json into a go file it converts it into a struct for me. I've used that to generate the structs for me which is way nicer.
+
+I've removed the checks I was doing for the capabilities of the node because it was hard to do reflection and figure out the names and values of the capabilities struct. I can revisit this at some point, but I want to continue. I think the tests will become more robust when I'm able to layer them on top of each-other. One idea I have is for a test that creates two nodes, puts them in a cluster and then calls getNodes and makes sure there are two of them. 
