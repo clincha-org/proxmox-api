@@ -55,4 +55,48 @@ I am now implementing a data source. I've added some of the code to the provider
 
 I've added the code now. IntelliJ has a cool thing that when I paste json into a go file it converts it into a struct for me. I've used that to generate the structs for me which is way nicer.
 
-I've removed the checks I was doing for the capabilities of the node because it was hard to do reflection and figure out the names and values of the capabilities struct. I can revisit this at some point, but I want to continue. I think the tests will become more robust when I'm able to layer them on top of each-other. One idea I have is for a test that creates two nodes, puts them in a cluster and then calls getNodes and makes sure there are two of them. 
+I've removed the checks I was doing for the capabilities of the node because it was hard to do reflection and figure out the names and values of the capabilities struct. I can revisit this at some point, but I want to continue. I think the tests will become more robust when I'm able to layer them on top of each-other. One idea I have is for a test that creates two nodes, puts them in a cluster and then calls getNodes and makes sure there are two of them.
+
+---
+
+I've implemented the data source for nodes! I get the data back from the API and it's coming out as Terraform output!
+
+```text
+Changes to Outputs:
+  + edu_nodes = {
+      + node = {
+          + data = [
+              + {
+                  + cpu             = 0.00597014925373134
+                  + disk            = 3672838144
+                  + id              = "node/pve"
+                  + level           = ""
+                  + max_cpu         = 1
+                  + max_disk        = 19136331776
+                  + max_memory      = 2043310080
+                  + memory          = 1098805248
+                  + node            = "pve"
+                  + ssl_fingerprint = "62:49:13:7F:E8:01:D7:3F:09:68:5C:A5:F3:95:02:39:8A:72:42:40:4A:20:50:9F:53:45:B5:CF:F8:0A:F7:B1"
+                  + status          = "online"
+                  + type            = "node"
+                  + uptime          = 4294
+                },
+            ]
+        }
+    }
+```
+
+How cool is that!? 
+
+Anyway, issues with it so far
+- The data wrapper is pretty rubbish
+- Not sure what those numbers all mean
+- I could probably make it better with some descriptions
+
+All fixable issues but let's get it done before moving on to the next stage. The issues I want to fix more generally are:
+- The terraform code isn't in a repository that I control
+- There aren't any tests in the Terraform code for me to run
+- This is all happening in my main PC so I can't get it working on my laptop
+- This is all working against Proxmox VE 7 but not 8
+- The rest of the API needs to be implemented!
+
