@@ -100,3 +100,29 @@ All fixable issues but let's get it done before moving on to the next stage. The
 - This is all working against Proxmox VE 7 but not 8
 - The rest of the API needs to be implemented!
 
+---
+
+I've sorted out the data wrapper issue! This is much nicer output:
+
+```text
+Changes to Outputs:
+  + edu_nodes = {
+      + nodes = [
+          + {
+              + cpu             = 0.0029940119760479
+              + disk            = 3673042944
+              + id              = "node/pve"
+              + level           = ""
+              + max_cpu         = 1
+              + max_disk        = 19136331776
+              + max_memory      = 2043310080
+              + memory          = 1092751360
+              + node            = "pve"
+              + ssl_fingerprint = "62:49:13:7F:E8:01:D7:3F:09:68:5C:A5:F3:95:02:39:8A:72:42:40:4A:20:50:9F:53:45:B5:CF:F8:0A:F7:B1"
+              + status          = "online"
+              + type            = "node"
+              + uptime          = 8005
+            },
+        ]
+    }
+```
