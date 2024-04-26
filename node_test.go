@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/clincha-org/proxmox-api/pkg/proxmox"
 	"testing"
 )
@@ -36,7 +35,4 @@ func TestGetNodes(t *testing.T) {
 	if nodes[0].Uptime <= 0 {
 		t.Errorf("Expected nodes uptime to be greater than 0, got %q", nodes[0].Uptime)
 	}
-
-	fmt.Println(nodes)
-
 }

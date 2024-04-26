@@ -30,7 +30,7 @@ type Node struct {
 const NodesPath string = "nodes"
 
 func (client *Client) GetNodes() ([]Node, error) {
-	node := []Node{}
+	var node []Node
 	request, err := http.NewRequest(
 		"GET",
 		client.Host+ApiPath+NodesPath,

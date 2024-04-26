@@ -126,3 +126,8 @@ Changes to Outputs:
         ]
     }
 ```
+
+---
+
+The next part of the tutorial is about making resources. I've had a look through the API documentation for Proxmox and it looks like the most simple resource to create is probably a network. I'm going to try and create one of those. I have started the Terraform Provider side but I can't go much further without having a dig into the actual API and getting some code working to pull that data through.
+
