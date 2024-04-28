@@ -28,3 +28,24 @@ func TestGetNetwork(t *testing.T) {
 
 	fmt.Println(networks[0])
 }
+
+func TestCreateNetworkBridge(t *testing.T) {
+	host := "https://localhost:8006"
+	username := "root@pam"
+	password := "vagrant"
+
+	client, err := proxmox.NewClient(&host, &username, &password)
+	if err != nil {
+		t.Error(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = client.CreateNetwork(&nodes[0])
+	if err != nil {
+		t.Error(err)
+	}
+}
