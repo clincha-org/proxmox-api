@@ -148,3 +148,12 @@ I found a linter. I want to do this when I set up the GitHub actions to trigger 
 ---
 
 I started to work on the Terraform side of things and then realised that I needed to return the Network object when I created it. So I added a function that gets a specific interface given the interface name. I can then call that at the end of the create which has the added benefit that it checks with the API to make sure that the network does actually exist.
+
+---
+
+I have most of the Terraform code in place now, and I'm running the terraform apply command. However, I've hit my first error with pointers! This will be a fun one to debug. I'm sure I'll learn a lot, but I think this one could be painful...
+
+```text
+panic: runtime error: invalid memory address or nil pointer dereference
+[signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0xa85687]
+```
