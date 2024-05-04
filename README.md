@@ -131,3 +131,16 @@ Changes to Outputs:
 
 The next part of the tutorial is about making resources. I've had a look through the API documentation for Proxmox and it looks like the most simple resource to create is probably a network. I'm going to try and create one of those. I have started the Terraform Provider side but I can't go much further without having a dig into the actual API and getting some code working to pull that data through.
 
+---
+
+This was tricky, but I learned a lot that will help me out with debugging and make my code way better at reporting errors.
+
+First thing is that HTTP responses normally return a body of some description, even if the response is not a 200. I spent a long time trying to figure out what the issue was when I only got a 400 response. When I looked into the body of the response it gave me the exact error. There was some issue with the JSON that I was passing in and I realised that I hadn't set the Content-Type header that it wanted.
+
+Having all the tests is also really useful. Being able to run everything as soon as I make a change is awesome.
+
+Anyway, the network now has a create and delete method. I've only tried creating and deleting a bridge, but I'm going to do the Terraform side now and see how we get on.
+
+---
+
+I found a linter. I want to do this when I set up the GitHub actions to trigger the builds for this. https://golangci-lint.run/

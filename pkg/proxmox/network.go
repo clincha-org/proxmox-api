@@ -2,7 +2,6 @@ package proxmox
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,50 +16,39 @@ type NetworkModel struct {
 }
 
 type Network struct {
-	Gateway     string   `json:"gateway"`
-	Type        string   `json:"type"`
-	Autostart   int      `json:"autostart"`
-	Families    []string `json:"families"`
-	Method6     string   `json:"method6"`
-	Iface       string   `json:"iface"`
-	BridgeFd    string   `json:"bridge_fd"`
-	Netmask     string   `json:"netmask"`
-	Priority    int      `json:"priority"`
-	Active      int      `json:"active"`
-	Method      string   `json:"method"`
-	BridgeStp   string   `json:"bridge_stp"`
-	Address     string   `json:"address"`
-	Cidr        string   `json:"cidr"`
-	BridgePorts string   `json:"bridge_ports"`
-}
-
-type NewNetworkModel struct {
-	InterfaceName string `json:"iface"`
-	Node          string `json:"node"`
-	InterfaceType string `json:"type"`
+	Node        string   `json:"node,omitempty"`
+	Gateway     string   `json:"gateway,omitempty"`
+	Type        string   `json:"type,omitempty"`
+	Autostart   int      `json:"autostart,omitempty"`
+	Families    []string `json:"families,omitempty"`
+	Method6     string   `json:"method6,omitempty"`
+	Interface   string   `json:"iface,omitempty"`
+	BridgeFd    string   `json:"bridge_fd,omitempty"`
+	Netmask     string   `json:"netmask,omitempty"`
+	Priority    int      `json:"priority,omitempty"`
+	Active      int      `json:"active,omitempty"`
+	Method      string   `json:"method,omitempty"`
+	BridgeStp   string   `json:"bridge_stp,omitempty"`
+	Address     string   `json:"address,omitempty"`
+	Cidr        string   `json:"cidr,omitempty"`
+	BridgePorts string   `json:"bridge_ports,omitempty"`
 }
 
 func (client *Client) GetNetworks(node *Node) ([]Network, error) {
+	url := client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath
 	var network []Network
+
 	request, err := http.NewRequest(
 		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node.Node+NetworkPath,
+		url,
 		nil,
 	)
 	if err != nil {
 		return network, err
 	}
 
-	cookie := &http.Cookie{
-		Name:  "PVEAuthCookie",
-		Value: client.Ticket.Data.Ticket,
-	}
-	request.AddCookie(cookie)
-
-	request.Header.Set(
-		"CSRFPreventionToken",
-		client.Ticket.Data.CSRFPreventionToken,
-	)
+	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
+	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
 
 	response, err := client.HTTPClient.Do(request)
 	if err != nil {
@@ -87,53 +75,72 @@ func (client *Client) GetNetworks(node *Node) ([]Network, error) {
 	return network, nil
 }
 
-func (client *Client) CreateNetwork(node *Node) (Network, error) {
-	var payload = NewNetworkModel{
-		InterfaceName: "vmbr2",
-		Node:          "pve",
-		InterfaceType: "bridge",
-	}
+func (client *Client) CreateNetwork(node *Node, network *Network) (Network, error) {
+	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/"
 
-	jsonData, err := json.Marshal(payload)
+	jsonData, err := json.Marshal(&network)
 	if err != nil {
-		return Network{}, err
+		return Network{}, fmt.Errorf("unable to marshall JSON. Error was: %v", err)
 	}
 
-	client.HTTPClient.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}
-
-	response, err := client.HTTPClient.Post(
-		client.Host+ApiPath+NodesPath+"/"+node.Node+NetworkPath,
-		"application/x-www-form-urlencoded",
+	request, err := http.NewRequest(
+		"POST",
+		url,
 		bytes.NewBuffer(jsonData),
 	)
 	if err != nil {
-		return Network{}, err
+		return Network{}, fmt.Errorf("unable to create new HTTP request. Error was %v", err)
 	}
 
-	if response.StatusCode != http.StatusOK {
-		return Network{}, errors.New(response.Status)
+	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
+	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.HTTPClient.Do(request)
+	if err != nil {
+		return Network{}, fmt.Errorf("error recieved when making request to create network. Error was %v", err)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return Network{}, err
+		return Network{}, fmt.Errorf("error reading response body. Error was %v", err)
 	}
 
-	fmt.Println(body)
+	if response.StatusCode != http.StatusOK {
+		return Network{}, fmt.Errorf("network creation failed. Status returned %v Body of response was %v", response.Status, string(body))
+	}
 
-	//
-	//err = json.Unmarshal(body, &ticket)
-	//if err != nil {
-	//	return &ticket, err
-	//}
-	//
-	//err = response.Body.Close()
-	//if err != nil {
-	//	return &ticket, err
-	//}
-	return Network{}, nil
+	return *network, nil
+}
+
+func (client *Client) DeleteNetwork(node *Node, network *Network) error {
+	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/" + network.Interface
+
+	request, err := http.NewRequest(
+		"DELETE",
+		url,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("unable to create request, error was %v", err)
+	}
+
+	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
+	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
+
+	response, err := client.HTTPClient.Do(request)
+	if err != nil {
+		return fmt.Errorf("request failed, error was %v", err)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body, error was %v", err)
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("error recieved in http response when deleting netowrk, error was %v. Response body was %v", err, body)
+	}
+
+	return nil
 }
