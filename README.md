@@ -144,3 +144,7 @@ Anyway, the network now has a create and delete method. I've only tried creating
 ---
 
 I found a linter. I want to do this when I set up the GitHub actions to trigger the builds for this. https://golangci-lint.run/
+
+---
+
+I started to work on the Terraform side of things and then realised that I needed to return the Network object when I created it. So I added a function that gets a specific interface given the interface name. I can then call that at the end of the create which has the added benefit that it checks with the API to make sure that the network does actually exist.

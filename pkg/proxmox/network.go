@@ -15,8 +15,11 @@ type NetworkModel struct {
 	Data []Network `json:"data"`
 }
 
+type SingleNetworkModel struct {
+	Data Network `json:"data"`
+}
+
 type Network struct {
-	Node        string   `json:"node,omitempty"`
 	Gateway     string   `json:"gateway,omitempty"`
 	Type        string   `json:"type,omitempty"`
 	Autostart   int      `json:"autostart,omitempty"`
@@ -75,6 +78,48 @@ func (client *Client) GetNetworks(node *Node) ([]Network, error) {
 	return network, nil
 }
 
+func (client *Client) GetNetwork(node *Node, networkName string) (Network, error) {
+	url := client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/" + networkName
+	var network Network
+
+	request, err := http.NewRequest(
+		"GET",
+		url,
+		nil,
+	)
+	if err != nil {
+		return network, err
+	}
+
+	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
+	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
+
+	response, err := client.HTTPClient.Do(request)
+	if err != nil {
+		return network, fmt.Errorf("unable to create new HTTP request. Error was %v", err)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return network, fmt.Errorf("error reading response body. Error was %v", err)
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return network, fmt.Errorf("network creation failed. Status returned %v Body of response was %v", response.Status, string(body))
+	}
+
+	networkModel := SingleNetworkModel{}
+	err = json.Unmarshal(body, &networkModel)
+	if err != nil {
+		return network, fmt.Errorf("unable to marshall JSON. Error was: %v", err)
+	}
+
+	network = networkModel.Data
+	network.Interface = networkName
+
+	return network, nil
+}
+
 func (client *Client) CreateNetwork(node *Node, network *Network) (Network, error) {
 	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/"
 
@@ -110,7 +155,7 @@ func (client *Client) CreateNetwork(node *Node, network *Network) (Network, erro
 		return Network{}, fmt.Errorf("network creation failed. Status returned %v Body of response was %v", response.Status, string(body))
 	}
 
-	return *network, nil
+	return client.GetNetwork(node, network.Interface)
 }
 
 func (client *Client) DeleteNetwork(node *Node, network *Network) error {

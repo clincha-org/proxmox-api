@@ -1,7 +1,6 @@
-package main
+package proxmox
 
 import (
-	"github.com/clincha-org/proxmox-api/pkg/proxmox"
 	"testing"
 )
 
@@ -10,7 +9,7 @@ func TestGetNodes(t *testing.T) {
 	username := "root@pam"
 	password := "vagrant"
 
-	client, err := proxmox.NewClient(&host, &username, &password)
+	client, err := NewClient(&host, &username, &password)
 	if err != nil {
 		t.Error(err)
 	}

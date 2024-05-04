@@ -1,9 +1,14 @@
 package proxmox
 
 import (
+	"crypto/tls"
+	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -48,4 +53,48 @@ func NewClient(Host *string, Username *string, Password *string) (*Client, error
 	client.Ticket = ticket
 
 	return &client, nil
+}
+
+func (client *Client) Login() (*Ticket, error) {
+	var ticket = Ticket{}
+
+	authPayload := url.Values{}
+	authPayload.Add("username", client.Username)
+	authPayload.Add("password", client.Password)
+
+	client.HTTPClient.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+
+	response, err := client.HTTPClient.Post(
+		client.Host+ApiPath+AuthenticationTicketPath,
+		"application/x-www-form-urlencoded",
+		strings.NewReader(authPayload.Encode()),
+	)
+	if err != nil {
+		return &ticket, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return &ticket, errors.New(response.Status)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return &ticket, err
+	}
+
+	err = json.Unmarshal(body, &ticket)
+	if err != nil {
+		return &ticket, err
+	}
+
+	err = response.Body.Close()
+	if err != nil {
+		return &ticket, err
+	}
+
+	return &ticket, nil
 }
