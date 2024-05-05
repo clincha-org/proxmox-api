@@ -164,3 +164,20 @@ I watched a YouTube video about pointers and the nil pointer dereference error a
 
 I have got the apply working now :)
 
+---
+
+I have got the update function working now and I have also created a reload function to reload the interface everytime that it has changed. Next step is to implement all of that over to the Terraform provider. I have decided that the first release is going to be the network work. Before that I have a lot of work to do:
+
+- Make the error messages clearer and consistent
+- Add logging
+- Test other interface types
+- Ensure the update method works as expected without needing to remove a bunch of fields
+- Make the Terraform network resource work
+- Lint the code
+- Create a build and release workflow in GitHub
+- Decide on the format of this diary/log
+- Add documentation to the functions
+- Add a CONTRIBUTING.md file to the project
+- Start a new repository for the Terraform code so that I don't have all the HashiCups example code
+- Move this list into a set of GitHub issues and create a milestone
+- Have the testing code create the vagrant boxes?

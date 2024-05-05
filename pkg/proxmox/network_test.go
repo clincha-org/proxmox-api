@@ -8,11 +8,7 @@ import (
 const PrimaryVirtualBridgeName = "vmbr0"
 
 func TestGetNetworks(t *testing.T) {
-	host := "https://localhost:8006"
-	username := "root@pam"
-	password := "vagrant"
-
-	client, err := NewClient(&host, &username, &password)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Error(err)
 	}
@@ -51,11 +47,7 @@ func TestGetNetworks(t *testing.T) {
 }
 
 func TestGetNetwork(t *testing.T) {
-	host := "https://localhost:8006"
-	username := "root@pam"
-	password := "vagrant"
-
-	client, err := NewClient(&host, &username, &password)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Error(err)
 	}
@@ -83,12 +75,8 @@ func TestGetNetwork(t *testing.T) {
 	}
 }
 
-func TestCreateAndDeleteNetworkBridge(t *testing.T) {
-	host := "https://localhost:8006"
-	username := "root@pam"
-	password := "vagrant"
-
-	client, err := NewClient(&host, &username, &password)
+func TestCreateDeleteNetworkBridge(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Error(err)
 	}
@@ -122,7 +110,66 @@ func TestCreateAndDeleteNetworkBridge(t *testing.T) {
 		t.Errorf("Expected network method to be manual. Got %q instead", network.Method)
 	}
 
-	err = client.DeleteNetwork(&nodes[0], &network)
+	err = client.DeleteNetwork(&nodes[0], network.Interface)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Error(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Error(err)
+	}
+
+	testInterface := "vmbr47"
+
+	network := Network{
+		Type:      "bridge",
+		Interface: testInterface,
+	}
+
+	network, err = client.CreateNetwork(&nodes[0], &network)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if network.Interface != testInterface {
+		t.Errorf("Expected network to be called %q. Got %q instead", testInterface, network.Interface)
+	}
+
+	if network.Type != "bridge" {
+		t.Errorf("Expected network to be of type bridge. Got type %q instead", network.Type)
+	}
+
+	if network.Method != "manual" {
+		t.Errorf("Expected network method to be manual. Got %q instead", network.Method)
+	}
+
+	network.Autostart = 1
+
+	network.BridgeStp = ""
+	network.BridgeFd = ""
+	network.Method6 = ""
+	network.Families = nil
+	network.Priority = 0
+	network.Method = ""
+
+	network, err = client.UpdateNetwork(&nodes[0], &network)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if network.Autostart != 1 {
+		t.Errorf("expected autostart to be 1 but got %v", network.Autostart)
+	}
+
+	err = client.DeleteNetwork(&nodes[0], network.Interface)
 	if err != nil {
 		t.Error(err)
 	}

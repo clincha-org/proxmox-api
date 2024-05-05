@@ -24,7 +24,7 @@ type Client struct {
 	Ticket     *Ticket
 }
 
-func NewClient(Host *string, Username *string, Password *string) (*Client, error) {
+func NewClient(Host string, Username string, Password string) (*Client, error) {
 	client := Client{
 		HTTPClient: &http.Client{
 			Timeout: 10 * time.Second,
@@ -32,17 +32,17 @@ func NewClient(Host *string, Username *string, Password *string) (*Client, error
 		Host: DefaultHostURL,
 	}
 
-	if Host != nil {
-		client.Host = *Host
+	if Host != "" {
+		client.Host = Host
 	} else {
-		slog.Warn("Using default host as none was specified")
+		slog.Warn("Using default DefaultHostURL as none was specified")
 	}
 
-	if Username == nil || Password == nil {
-		return &client, errors.New("username and password are required")
+	if Username == "" || Password == "" {
+		return &client, errors.New("TestUsername and TestPassword are required")
 	} else {
-		client.Username = *Username
-		client.Password = *Password
+		client.Username = Username
+		client.Password = Password
 	}
 
 	ticket, err := client.Login()

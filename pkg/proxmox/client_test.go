@@ -4,12 +4,11 @@ import (
 	"testing"
 )
 
-func TestLogin(t *testing.T) {
-	host := "https://localhost:8006"
-	username := "root@pam"
-	password := "vagrant"
+const TestUsername = "root@pam"
+const TestPassword = "vagrant"
 
-	client, err := NewClient(&host, &username, &password)
+func TestLogin(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Error(err)
 	}
@@ -29,11 +28,7 @@ func TestLogin(t *testing.T) {
 }
 
 func TestIncorrectUsername(t *testing.T) {
-	host := "https://localhost:8006"
-	username := "thisuserdoesnotexist@pam"
-	password := "thisuserdoesnotexist"
-
-	_, err := NewClient(&host, &username, &password)
+	_, err := NewClient(DefaultHostURL, TestUsername, "wrong")
 	if err == nil {
 		t.Error("Expected authentication failure")
 	}

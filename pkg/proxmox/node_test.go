@@ -5,11 +5,7 @@ import (
 )
 
 func TestGetNodes(t *testing.T) {
-	host := "https://localhost:8006"
-	username := "root@pam"
-	password := "vagrant"
-
-	client, err := NewClient(&host, &username, &password)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Error(err)
 	}
