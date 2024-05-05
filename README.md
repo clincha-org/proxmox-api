@@ -157,3 +157,10 @@ I have most of the Terraform code in place now, and I'm running the terraform ap
 panic: runtime error: invalid memory address or nil pointer dereference
 [signal SIGSEGV: segmentation violation code=0x1 addr=0x0 pc=0xa85687]
 ```
+
+---
+
+I watched a YouTube video about pointers and the nil pointer dereference error and learned a lot. It was great to see a basic example of how objects in Go work, so I could apply it to this. I didn't even realise that without a pointer Go copies the object to the function. I would have expected it to modify the object I send it, but it creates a new one and modifies that which is rarely useful.
+
+I have got the apply working now :)
+
