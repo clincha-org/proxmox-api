@@ -134,7 +134,7 @@ func (client *Client) CreateNetwork(node *Node, network *Network) (Network, erro
 		bytes.NewBuffer(jsonData),
 	)
 	if err != nil {
-		return Network{}, fmt.Errorf("unable to create new HTTP request. Error was %v", err)
+		return Network{}, fmt.Errorf("unable to create new network HTTP POST request. Error was %v", err)
 	}
 
 	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
@@ -153,6 +153,29 @@ func (client *Client) CreateNetwork(node *Node, network *Network) (Network, erro
 
 	if response.StatusCode != http.StatusOK {
 		return Network{}, fmt.Errorf("network creation failed. Status returned %v Body of response was %v", response.Status, string(body))
+	}
+
+	// Now we need to call the PUT endpoint of the node's network to reload the network configuration
+	request, err = http.NewRequest("PUT", url, nil)
+	if err != nil {
+		return Network{}, fmt.Errorf("unable to create new network HTTP PUT request, error was %v", err)
+	}
+
+	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
+	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
+
+	response, err = client.HTTPClient.Do(request)
+	if err != nil {
+		return Network{}, fmt.Errorf("error recieved when making request to reload network, error was %v", err)
+	}
+
+	body, err = io.ReadAll(response.Body)
+	if err != nil {
+		return Network{}, fmt.Errorf("error reading response body. Error was %v", err)
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return Network{}, fmt.Errorf("network reload failed: %v Body of response was %v", response.Status, string(body))
 	}
 
 	return client.GetNetwork(node, network.Interface)
