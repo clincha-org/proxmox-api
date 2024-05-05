@@ -121,7 +121,7 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 }
 
 func (client *Client) CreateNetwork(node *Node, network *Network) (Network, error) {
-	var url = client.Host + ApiPath + NodesPath + "/pve" + NetworkPath + "/"
+	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/"
 
 	jsonData, err := json.Marshal(&network)
 	if err != nil {
