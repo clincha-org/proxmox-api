@@ -88,12 +88,12 @@ func TestCreateDeleteNetworkBridge(t *testing.T) {
 
 	testInterface := "vmbr99"
 
-	network := Network{
-		Type:      "bridge",
+	networkRequest := NetworkRequest{
 		Interface: testInterface,
+		Type:      "bridge",
 	}
 
-	network, err = client.CreateNetwork(&nodes[0], &network)
+	network, err := client.CreateNetwork(&nodes[0], &networkRequest)
 	if err != nil {
 		t.Error(err)
 	}
@@ -128,13 +128,15 @@ func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
 	}
 
 	testInterface := "vmbr47"
+	testCIDR := "10.0.3.15/14"
+	//testComments := "testComment"
 
-	network := Network{
+	networkRequest := NetworkRequest{
 		Type:      "bridge",
 		Interface: testInterface,
 	}
 
-	network, err = client.CreateNetwork(&nodes[0], &network)
+	network, err := client.CreateNetwork(&nodes[0], &networkRequest)
 	if err != nil {
 		t.Error(err)
 	}
@@ -151,16 +153,14 @@ func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
 		t.Errorf("Expected network method to be manual. Got %q instead", network.Method)
 	}
 
-	network.Autostart = 1
+	networkRequest = NetworkRequest{
+		Interface: network.Interface,
+		Type:      network.Type,
+		AutoStart: 1,
+		CIDR:      testCIDR,
+	}
 
-	network.BridgeStp = ""
-	network.BridgeFd = ""
-	network.Method6 = ""
-	network.Families = nil
-	network.Priority = 0
-	network.Method = ""
-
-	network, err = client.UpdateNetwork(&nodes[0], &network)
+	network, err = client.UpdateNetwork(&nodes[0], &networkRequest)
 	if err != nil {
 		t.Error(err)
 	}
@@ -169,7 +169,35 @@ func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
 		t.Errorf("expected autostart to be 1 but got %v", network.Autostart)
 	}
 
-	err = client.DeleteNetwork(&nodes[0], network.Interface)
+	if network.Cidr != testCIDR {
+		t.Errorf("expected CIDR to be %v but got %v", testCIDR, network.Cidr)
+	}
+
+	networkRequest = NetworkRequest{
+		Interface: network.Interface,
+		Type:      network.Type,
+		Comments:  "Hello",
+		MTU:       8000,
+	}
+
+	network, err = client.UpdateNetwork(&nodes[0], &networkRequest)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if network.Autostart != 1 {
+		t.Errorf("expected autostart to be 1 but got %v", network.Autostart)
+	}
+
+	if network.Cidr != testCIDR {
+		t.Errorf("expected CIDR to be %v but got %v", testCIDR, network.Cidr)
+	}
+
+	//if network.comments != testComments {
+	//	t.Errorf("expected comments to be %v but got %v", testComments, network.Cidr)
+	//}
+
+	err = client.DeleteNetwork(&nodes[0], testInterface)
 	if err != nil {
 		t.Error(err)
 	}

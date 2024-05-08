@@ -6,36 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"reflect"
+	"slices"
+	"strings"
 )
 
 const NetworkPath = "/network"
-
-type NetworkModel struct {
-	Data []Network `json:"data"`
-}
-
-type SingleNetworkModel struct {
-	Data Network `json:"data"`
-}
-
-type Network struct {
-	Gateway     string   `json:"gateway,omitempty"`
-	Type        string   `json:"type,omitempty"`
-	Autostart   int      `json:"autostart,omitempty"`
-	Families    []string `json:"families,omitempty"`
-	Method6     string   `json:"method6,omitempty"`
-	Interface   string   `json:"iface,omitempty"`
-	BridgeFd    string   `json:"bridge_fd,omitempty"`
-	Netmask     string   `json:"netmask,omitempty"`
-	Priority    int      `json:"priority,omitempty"`
-	Active      int      `json:"active,omitempty"`
-	Method      string   `json:"method,omitempty"`
-	BridgeStp   string   `json:"bridge_stp,omitempty"`
-	Address     string   `json:"address,omitempty"`
-	Cidr        string   `json:"cidr,omitempty"`
-	BridgePorts string   `json:"bridge_ports,omitempty"`
-}
 
 func (client *Client) GetNetworks(node *Node) ([]Network, error) {
 	url := client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath
@@ -67,7 +45,7 @@ func (client *Client) GetNetworks(node *Node) ([]Network, error) {
 		return network, err
 	}
 
-	networkModel := NetworkModel{}
+	networkModel := NetworksResponse{}
 	err = json.Unmarshal(body, &networkModel)
 	if err != nil {
 		return network, err
@@ -108,10 +86,33 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 		return network, fmt.Errorf("network creation failed. Status returned %v Body of response was %v", response.Status, string(body))
 	}
 
-	networkModel := SingleNetworkModel{}
+	slog.Info(fmt.Sprintf("Response from GetNetwork endpoint was: %v", string(body)))
+
+	networkModel := NetworkResponse{}
 	err = json.Unmarshal(body, &networkModel)
 	if err != nil {
 		return network, fmt.Errorf("unable to unmarshall JSON, error was: %v", err)
+	}
+
+	// Check to make sure there aren't any fields that are missing in the struct and warn
+	// More information in: https://github.com/clincha-org/proxmox-api/issues/5
+	var networkJSON map[string]map[string]interface{}
+
+	err = json.Unmarshal(body, &networkJSON)
+	if err != nil {
+		slog.Error(fmt.Sprintf("Unable to unmarshall body for missing field check, error was %v", err))
+	}
+
+	networkModelStruct := reflect.ValueOf(&network).Elem()
+	var networkModelStructFields []string
+	for i := 0; i < networkModelStruct.NumField(); i++ {
+		networkModelStructFields = append(networkModelStructFields, strings.Replace(networkModelStruct.Type().Field(i).Tag.Get("json"), ",omitempty", "", -1))
+	}
+
+	for name, _ := range networkJSON["data"] {
+		if !slices.Contains(networkModelStructFields, name) {
+			slog.Warn(fmt.Sprintf("field %q returned by Proxmox API but field does not exist in NetworkModel struct. Please report this to the developers. See: https://github.com/clincha-org/proxmox-api/issues/5", name))
+		}
 	}
 
 	network = networkModel.Data
@@ -120,10 +121,10 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 	return network, nil
 }
 
-func (client *Client) CreateNetwork(node *Node, network *Network) (Network, error) {
+func (client *Client) CreateNetwork(node *Node, networkRequest *NetworkRequest) (Network, error) {
 	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/"
 
-	jsonData, err := json.Marshal(&network)
+	jsonData, err := json.Marshal(&networkRequest)
 	if err != nil {
 		return Network{}, fmt.Errorf("unable to marshall JSON. Error was: %v", err)
 	}
@@ -160,13 +161,13 @@ func (client *Client) CreateNetwork(node *Node, network *Network) (Network, erro
 		return Network{}, fmt.Errorf("network reload failed, error was: %v", err)
 	}
 
-	return client.GetNetwork(node, network.Interface)
+	return client.GetNetwork(node, networkRequest.Interface)
 }
 
-func (client *Client) UpdateNetwork(node *Node, network *Network) (Network, error) {
-	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/" + network.Interface
+func (client *Client) UpdateNetwork(node *Node, networkRequest *NetworkRequest) (Network, error) {
+	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/" + networkRequest.Interface
 
-	jsonData, err := json.Marshal(&network)
+	jsonData, err := json.Marshal(&networkRequest)
 	if err != nil {
 		return Network{}, fmt.Errorf("unable to marshall JSON, error was: %v", err)
 	}
@@ -199,7 +200,7 @@ func (client *Client) UpdateNetwork(node *Node, network *Network) (Network, erro
 		return Network{}, fmt.Errorf("network reload failed, error was: %v", err)
 	}
 
-	return client.GetNetwork(node, network.Interface)
+	return client.GetNetwork(node, networkRequest.Interface)
 }
 
 func (client *Client) DeleteNetwork(node *Node, network string) error {
