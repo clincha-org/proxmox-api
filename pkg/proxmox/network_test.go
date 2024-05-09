@@ -202,3 +202,75 @@ func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestBondedNetworkConfiguration(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := NetworkRequest{
+		Interface: "eno1",
+		Type:      "eth",
+		AutoStart: 1,
+	}
+
+	_, err = client.CreateNetwork(&nodes[0], &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request.Interface = "eno2"
+	_, err = client.CreateNetwork(&nodes[0], &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	Interface := "bond1"
+	Type := "bond"
+	OVSBonds := "eno1,eno2"
+	BondMode := "active-backup"
+
+	request = NetworkRequest{
+		Interface: Interface,
+		Type:      Type,
+		OVSBonds:  OVSBonds,
+		BondMode:  BondMode,
+	}
+	network, err := client.CreateNetwork(&nodes[0], &request)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if network.Interface != Interface {
+		t.Errorf("expected %v for Interface but got %v", Interface, network.Interface)
+	}
+	if network.Type != Type {
+		t.Errorf("expected %v for Type but got %v", Type, network.Type)
+	}
+	if network.OVSBonds != OVSBonds {
+		t.Errorf("expected %v for OVSBonds but got %v", OVSBonds, network.OVSBonds)
+	}
+	if network.BondMode != BondMode {
+		t.Errorf("expected %v for BondMode but got %v", BondMode, network.BondMode)
+	}
+
+	err = client.DeleteNetwork(&nodes[0], "bond1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = client.DeleteNetwork(&nodes[0], "eno1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = client.DeleteNetwork(&nodes[0], "eno2")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+}

@@ -58,6 +58,7 @@ type Network struct {
 	Autostart              int      `json:"autostart,omitempty"`
 	BondPrimary            string   `json:"bond-primary,omitempty"`
 	BondMode               string   `json:"bond_mode,omitempty"`
+	BondMiiMon             string   `json:"bond_miimon,omitempty"`
 	BondTransmitHashPolicy string   `json:"bond_xmit_hash_policy,omitempty"`
 	BridgePorts            string   `json:"bridge_ports,omitempty"`
 	BridgeVlanAware        int64    `json:"bridge_vlan_aware,omitempty"`
