@@ -86,7 +86,7 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 		return network, fmt.Errorf("network creation failed. Status returned %v Body of response was %v", response.Status, string(body))
 	}
 
-	slog.Info(fmt.Sprintf("Response from GetNetwork endpoint was: %v", string(body)))
+	slog.Debug(fmt.Sprintf("Response from GetNetwork endpoint was: %v", string(body)))
 
 	networkModel := NetworkResponse{}
 	err = json.Unmarshal(body, &networkModel)
@@ -94,7 +94,7 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 		return network, fmt.Errorf("unable to unmarshall JSON, error was: %v", err)
 	}
 
-	// Check to make sure there aren't any fields that are missing in the struct and warn
+	// Check to make sure there aren't any fields that are missing in the struct. Warn if there are missing fields.
 	// More information in: https://github.com/clincha-org/proxmox-api/issues/5
 	var networkJSON map[string]map[string]interface{}
 
@@ -104,13 +104,16 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 	}
 
 	networkModelStruct := reflect.ValueOf(&network).Elem()
-	var networkModelStructFields []string
+	var NetworkStructFields []string
 	for i := 0; i < networkModelStruct.NumField(); i++ {
-		networkModelStructFields = append(networkModelStructFields, strings.Replace(networkModelStruct.Type().Field(i).Tag.Get("json"), ",omitempty", "", -1))
+		JSONFieldName := networkModelStruct.Type().Field(i).Tag.Get("json") // Get the JSON representation of the field
+		CommaIndex := strings.Index(JSONFieldName, ",")                     // Get the index of the comma (,omitempty)
+		JSONFieldName = JSONFieldName[:CommaIndex]                          // Remove everything after the comma
+		NetworkStructFields = append(NetworkStructFields, JSONFieldName)
 	}
 
 	for name, _ := range networkJSON["data"] {
-		if !slices.Contains(networkModelStructFields, name) {
+		if !slices.Contains(NetworkStructFields, name) {
 			slog.Warn(fmt.Sprintf("field %q returned by Proxmox API but field does not exist in NetworkModel struct. Please report this to the developers. See: https://github.com/clincha-org/proxmox-api/issues/5", name))
 		}
 	}

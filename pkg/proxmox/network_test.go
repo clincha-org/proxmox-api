@@ -10,17 +10,17 @@ const PrimaryVirtualBridgeName = "vmbr0"
 func TestGetNetworks(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	nodes, err := client.GetNodes()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	networks, err := client.GetNetworks(&nodes[0])
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if len(networks) <= 0 {
@@ -49,17 +49,17 @@ func TestGetNetworks(t *testing.T) {
 func TestGetNetwork(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	nodes, err := client.GetNodes()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	network, err := client.GetNetwork(&nodes[0], PrimaryVirtualBridgeName)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if network.Interface != PrimaryVirtualBridgeName {
@@ -78,12 +78,12 @@ func TestGetNetwork(t *testing.T) {
 func TestCreateDeleteNetworkBridge(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	nodes, err := client.GetNodes()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	testInterface := "vmbr99"
@@ -119,12 +119,12 @@ func TestCreateDeleteNetworkBridge(t *testing.T) {
 func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	nodes, err := client.GetNodes()
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	testInterface := "vmbr47"
@@ -169,8 +169,8 @@ func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
 		t.Errorf("expected autostart to be 1 but got %v", network.Autostart)
 	}
 
-	if network.Cidr != testCIDR {
-		t.Errorf("expected CIDR to be %v but got %v", testCIDR, network.Cidr)
+	if network.CIDR != testCIDR {
+		t.Errorf("expected CIDR to be %v but got %v", testCIDR, network.CIDR)
 	}
 
 	networkRequest = NetworkRequest{
@@ -189,8 +189,8 @@ func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
 		t.Errorf("expected autostart to be 1 but got %v", network.Autostart)
 	}
 
-	if network.Cidr != testCIDR {
-		t.Errorf("expected CIDR to be %v but got %v", testCIDR, network.Cidr)
+	if network.CIDR != testCIDR {
+		t.Errorf("expected CIDR to be %v but got %v", testCIDR, network.CIDR)
 	}
 
 	//if network.comments != testComments {
