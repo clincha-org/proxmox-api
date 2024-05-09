@@ -274,3 +274,35 @@ func TestBondedNetworkConfiguration(t *testing.T) {
 	}
 
 }
+
+func TestVLANNetworkConfiguration(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request := NetworkRequest{
+		Interface: "vmbr74",
+		Type:      "bridge",
+		VlanID:    3,
+	}
+
+	network, err := client.CreateNetwork(&nodes[0], &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if network.VlanID != 3 {
+		t.Errorf("expected %v for VlanID but got %v", 3, network.VlanID)
+	}
+
+	err = client.DeleteNetwork(&nodes[0], "vmbr74")
+	if err != nil {
+		t.Fatal(err)
+	}
+}

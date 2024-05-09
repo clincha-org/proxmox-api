@@ -45,7 +45,7 @@ type NetworkRequest struct {
 	OVSPorts               string `json:"ovs_ports,omitempty"`
 	OVSTag                 string `json:"ovs_tag,omitempty"`
 	Slaves                 string `json:"slaves,omitempty"`
-	VlanID                 string `json:"vlan-id,omitempty"`
+	VlanID                 int64  `json:"vlan-id,string,omitempty"`
 	VlanRawDevice          string `json:"vlan-raw-device,omitempty"`
 }
 
@@ -77,7 +77,7 @@ type Network struct {
 	OVSPorts               string   `json:"ovs_ports,omitempty"`
 	OVSTag                 string   `json:"ovs_tag,omitempty"`
 	Slaves                 string   `json:"slaves,omitempty"`
-	VlanID                 string   `json:"vlan-id,omitempty"`
+	VlanID                 int64    `json:"vlan-id,string,omitempty"`
 	VlanRawDevice          string   `json:"vlan-raw-device,omitempty"`
 	Families               []string `json:"families,omitempty"`
 	Method                 string   `json:"method,omitempty"`
