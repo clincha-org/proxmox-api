@@ -55,7 +55,7 @@ type Network struct {
 	Type                   string   `json:"type,omitempty"`
 	Address                string   `json:"address,omitempty"`
 	Address6               string   `json:"address6,omitempty"`
-	Autostart              int      `json:"autostart,omitempty"`
+	Autostart              int64    `json:"autostart,omitempty"`
 	BondPrimary            string   `json:"bond-primary,omitempty"`
 	BondMode               string   `json:"bond_mode,omitempty"`
 	BondMiiMon             string   `json:"bond_miimon,omitempty"`
@@ -83,7 +83,7 @@ type Network struct {
 	Method                 string   `json:"method,omitempty"`
 	Method6                string   `json:"method6,omitempty"`
 	BridgeFd               string   `json:"bridge_fd,omitempty"`
-	Priority               int      `json:"priority,omitempty"`
-	Active                 int      `json:"active,omitempty"`
+	Priority               int64    `json:"priority,omitempty"`
+	Active                 int64    `json:"active,omitempty"`
 	BridgeStp              string   `json:"bridge_stp,omitempty"`
 }
