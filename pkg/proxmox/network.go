@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+	"time"
 )
 
 const NetworkPath = "/network"
@@ -264,6 +265,9 @@ func (client *Client) ReloadNetwork(node *Node) error {
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("network reload failed: %v Body of response was %v", response.Status, string(body))
 	}
+
+	//Allow the network daemon time to reload the configuration
+	time.Sleep(1 * time.Second)
 
 	return nil
 }
