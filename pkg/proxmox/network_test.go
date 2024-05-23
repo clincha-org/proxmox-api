@@ -306,3 +306,45 @@ func TestVLANNetworkConfiguration(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// https://github.com/clincha-org/proxmox-api/issues/11
+func TestNetworkUpdateWithGolangZeroValues(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node := nodes[0]
+
+	request := NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		VlanID:    2,
+	}
+
+	_, err = client.CreateNetwork(&node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	request = NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		VlanID:    0,
+	}
+
+	network, err := client.UpdateNetwork(&node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if network.VlanID != 0 {
+		t.Fatalf("Expected VLAN ID to be 0, got %v instead", network.VlanID)
+	}
+
+}

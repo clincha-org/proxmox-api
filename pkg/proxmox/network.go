@@ -171,10 +171,14 @@ func (client *Client) CreateNetwork(node *Node, networkRequest *NetworkRequest) 
 func (client *Client) UpdateNetwork(node *Node, networkRequest *NetworkRequest) (Network, error) {
 	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/" + networkRequest.Interface
 
+	slog.Info(fmt.Sprintf("networkRequest struct is %+v", networkRequest))
+
 	jsonData, err := json.Marshal(&networkRequest)
 	if err != nil {
 		return Network{}, fmt.Errorf("unable to marshall JSON, error was: %v", err)
 	}
+
+	slog.Info(fmt.Sprintf("networkRequest JSON is %+v", string(jsonData)))
 
 	request, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
 	if err != nil {
