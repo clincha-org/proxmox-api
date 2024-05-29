@@ -8,7 +8,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"slices"
 	"time"
 )
 
@@ -85,7 +84,7 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 		return network, fmt.Errorf("network creation failed. Status returned %v Body of response was %v", response.Status, string(body))
 	}
 
-	slog.Debug(fmt.Sprintf("Response from GetNetwork endpoint was: %v", string(body)))
+	slog.Info(fmt.Sprintf("Response from GetNetwork endpoint was: %v", string(body)))
 
 	networkModel := NetworkResponse{}
 	err = json.Unmarshal(body, &networkModel)
@@ -102,10 +101,14 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 func (client *Client) CreateNetwork(node *Node, networkRequest *NetworkRequest) (Network, error) {
 	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/"
 
+	slog.Info(fmt.Sprintf("networkRequest struct is %+v", networkRequest))
+
 	jsonData, err := json.Marshal(&networkRequest)
 	if err != nil {
 		return Network{}, fmt.Errorf("unable to marshall JSON. Error was: %v", err)
 	}
+
+	slog.Info(fmt.Sprintf("networkRequest JSON is %+v", string(jsonData)))
 
 	request, err := http.NewRequest(
 		"POST",
@@ -143,11 +146,6 @@ func (client *Client) CreateNetwork(node *Node, networkRequest *NetworkRequest) 
 }
 
 func (client *Client) UpdateNetwork(node *Node, networkRequest *NetworkRequest) (Network, error) {
-	err := validateNetworkRequest(networkRequest)
-	if err != nil {
-		return Network{}, err
-	}
-
 	var url = client.Host + ApiPath + NodesPath + "/" + node.Node + NetworkPath + "/" + networkRequest.Interface
 
 	slog.Info(fmt.Sprintf("networkRequest struct is %+v", networkRequest))
@@ -251,24 +249,6 @@ func (client *Client) ReloadNetwork(node *Node) error {
 
 	//Allow the network daemon time to reload the configuration
 	time.Sleep(1 * time.Second)
-
-	return nil
-}
-
-func validateNetworkRequest(request *NetworkRequest) error {
-	// Ensure the Interface (name) and the Type are set
-	if request.Interface == "" {
-		return errors.New("interface must be set")
-	}
-	if request.Type == "" {
-		return errors.New("type must be set")
-	}
-
-	// Ensure the Type is set to a valid value
-	var validTypes = []string{"bridge", "bond", "eth", "alias", "vlan", "OVSBridge", "OVSBond", "OVSPort", "OVSIntPort"}
-	if !slices.Contains(validTypes, request.Type) {
-		return fmt.Errorf("type must be one of %+v", validTypes)
-	}
 
 	return nil
 }
