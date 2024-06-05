@@ -1,7 +1,6 @@
 package proxmox
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -26,8 +25,6 @@ func TestGetDefaultInterface(t *testing.T) {
 	if network.Interface != "vmbr0" {
 		t.Errorf("Incorrect interface returned. Expected vmbr0, got %v", network.Interface)
 	}
-
-	fmt.Printf("%+v", network)
 }
 
 // https://github.com/clincha-org/proxmox-api/issues/11
@@ -188,10 +185,11 @@ func TestNetworkAutostart(t *testing.T) {
 
 	node := &nodes[0]
 
+	autostart := true
 	request := NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		AutoStart: true,
+		AutoStart: &autostart,
 	}
 
 	network, err := client.CreateNetwork(node, &request)
@@ -202,14 +200,15 @@ func TestNetworkAutostart(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.Autostart != true {
-		t.Fatalf("Expected network autostart to be true, got %v instead", network.Autostart)
+	if network.Autostart != 1 {
+		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
 
+	autostart = false
 	request = NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		AutoStart: false,
+		AutoStart: &autostart,
 	}
 
 	network, err = client.UpdateNetwork(node, &request)
@@ -217,8 +216,8 @@ func TestNetworkAutostart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if network.Autostart != false {
-		t.Fatalf("Expected network autostart to be false, got %v instead", network.Autostart)
+	if network.Autostart != 0 {
+		t.Fatalf("Expected network autostart to be 0, got %v instead", network.Autostart)
 	}
 }
 
@@ -265,5 +264,52 @@ func TestNetworkBridgePorts(t *testing.T) {
 
 	if network.BridgePorts != "enp0s4" {
 		t.Fatalf("Expected bridge port to be enp0s4, got %v instead", network.BridgePorts)
+	}
+}
+
+func TestNetworkOmittedFields(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node := &nodes[0]
+
+	autostart := true
+	request := NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		AutoStart: &autostart,
+	}
+
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
+
+	if network.Autostart != 1 {
+		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
+	}
+
+	request = NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "alias",
+	}
+
+	network, err = client.UpdateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if network.Autostart != 1 {
+		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
 }

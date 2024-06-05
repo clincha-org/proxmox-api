@@ -23,9 +23,9 @@ type NetworkRequest struct {
 	Interface       string `json:"iface,omitempty"`
 	Type            string `json:"type,omitempty"`
 	Address         string `json:"address,omitempty"`
-	AutoStart       bool   `json:"autostart,omitempty"`
+	AutoStart       *bool  `json:"autostart,omitempty"`
 	BridgePorts     string `json:"bridge_ports,omitempty"`
-	BridgeVlanAware bool   `json:"bridge_vlan_aware,omitempty"`
+	BridgeVlanAware *bool  `json:"bridge_vlan_aware,omitempty"`
 	CIDR            string `json:"cidr,omitempty"`
 	Comments        string `json:"comments,omitempty"`
 	Gateway         string `json:"gateway,omitempty"`
@@ -39,9 +39,9 @@ type Network struct {
 	Interface       string `json:"iface,omitempty"`
 	Type            string `json:"type,omitempty"`
 	Address         string `json:"address,omitempty"`
-	Autostart       bool   `json:"autostart,omitempty"`
+	Autostart       int64  `json:"autostart,omitempty"`
 	BridgePorts     string `json:"bridge_ports,omitempty"`
-	BridgeVlanAware bool   `json:"bridge_vlan_aware,omitempty"`
+	BridgeVlanAware int64  `json:"bridge_vlan_aware,omitempty"`
 	CIDR            string `json:"cidr,omitempty"`
 	Comments        string `json:"comments,omitempty"`
 	Gateway         string `json:"gateway,omitempty"`
