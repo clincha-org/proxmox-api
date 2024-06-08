@@ -110,6 +110,8 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 		network.Comments = strings.Trim(network.Comments, "\n")
 	}
 
+	slog.Info(fmt.Sprintf("Cleaned network object is: %+v", network))
+
 	return network, nil
 }
 
