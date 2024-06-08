@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -94,6 +95,14 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 
 	network = networkModel.Data
 	network.Interface = networkName
+
+	// Convert the network CIDR into subnet mask format
+	if network.Netmask != "" {
+		network.Netmask, err = ConvertCIDRToNetmask(network.Netmask)
+		if err != nil {
+			return network, fmt.Errorf("unable to convert netmask CIDR value %v to valid subnet mask, error was: %v", network.Netmask, err)
+		}
+	}
 
 	return network, nil
 }
@@ -251,4 +260,13 @@ func (client *Client) ReloadNetwork(node *Node) error {
 	time.Sleep(1 * time.Second)
 
 	return nil
+}
+
+func ConvertCIDRToNetmask(cidr string) (string, error) {
+	cidrInt, err := strconv.Atoi(cidr)
+	if err != nil {
+		return cidr, err
+	}
+	var mask uint32 = 0xFFFFFFFF << (32 - uint32(cidrInt))
+	return fmt.Sprintf("%d.%d.%d.%d", byte(mask>>24), byte(mask>>16), byte(mask>>8), byte(mask)), nil
 }

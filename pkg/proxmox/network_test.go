@@ -91,13 +91,17 @@ func TestNetworkNetmaskUpdate(t *testing.T) {
 		Netmask:   "255.255.255.0",
 	}
 
-	_, err = client.CreateNetwork(node, &request)
+	network, err := client.CreateNetwork(node, &request)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
+
+	if network.Netmask != "255.255.255.0" {
+		t.Fatalf("Expected netmask to be 255.255.255.0, got %v instead", network.Netmask)
+	}
 
 	request = NetworkRequest{
 		Interface: "vmbr22",
@@ -106,13 +110,13 @@ func TestNetworkNetmaskUpdate(t *testing.T) {
 		Netmask:   "255.255.255.252",
 	}
 
-	network, err := client.UpdateNetwork(node, &request)
+	network, err = client.UpdateNetwork(node, &request)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if network.Netmask != 30 {
-		t.Fatalf("Expected netmask to be 30, got %v instead", network.Netmask)
+	if network.Netmask != "255.255.255.252" {
+		t.Fatalf("Expected netmask to be 255.255.255.252, got %v instead", network.Netmask)
 	}
 }
 
@@ -147,8 +151,8 @@ func TestNetworkCIDRUpdate(t *testing.T) {
 		t.Fatalf("Expected network address to be 10.0.3.13, got %v instead", network.Address)
 	}
 
-	if network.Netmask != 24 {
-		t.Fatalf("Expected netmask to be 24, got %v instead", network.Netmask)
+	if network.Netmask != "255.255.255.0" {
+		t.Fatalf("Expected netmask to be 255.255.255.0, got %v instead", network.Netmask)
 	}
 
 	request = NetworkRequest{
@@ -167,8 +171,8 @@ func TestNetworkCIDRUpdate(t *testing.T) {
 		t.Fatalf("Expected CIDR to be 10.0.3.13/30, got %v instead", network.CIDR)
 	}
 
-	if network.Netmask != 30 {
-		t.Fatalf("Expected netmask to be 30, got %v instead", network.Netmask)
+	if network.Netmask != "255.255.255.252" {
+		t.Fatalf("Expected netmask to be 255.255.255.252, got %v instead", network.Netmask)
 	}
 }
 
@@ -311,5 +315,38 @@ func TestNetworkOmittedFields(t *testing.T) {
 
 	if network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
+	}
+}
+
+func TestSubnetMaskReturnedInSameFormat(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node := &nodes[0]
+
+	request := NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		Address:   "10.1.2.3",
+		Netmask:   "255.255.255.0",
+	}
+
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
+
+	if network.Netmask != "255.255.255.0" {
+		t.Fatalf("Expected network mask to be 255.255.255.0, got %v instead", network.Autostart)
 	}
 }

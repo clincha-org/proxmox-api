@@ -46,7 +46,7 @@ type Network struct {
 	Comments        string `json:"comments,omitempty"`
 	Gateway         string `json:"gateway,omitempty"`
 	MTU             int64  `json:"mtu,string,omitempty"`
-	Netmask         int64  `json:"netmask,string,omitempty"` // CIDR Notation
+	Netmask         string `json:"netmask,omitempty"` // CIDR Notation
 	VlanID          int64  `json:"vlan-id,string,omitempty"`
 	// Computed values
 	Families []string `json:"families,omitempty"`
