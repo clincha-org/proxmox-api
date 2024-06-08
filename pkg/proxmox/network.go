@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -102,6 +103,11 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 		if err != nil {
 			return network, fmt.Errorf("unable to convert netmask CIDR value %v to valid subnet mask, error was: %v", network.Netmask, err)
 		}
+	}
+
+	// Remove the newline at the end of the comment
+	if network.Comments != "" {
+		network.Comments = strings.Trim(network.Comments, "\n")
 	}
 
 	return network, nil
