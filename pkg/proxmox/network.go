@@ -83,7 +83,7 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return network, fmt.Errorf("network creation failed. Status returned %v Body of response was %v", response.Status, string(body))
+		return network, fmt.Errorf("network read failed. Status returned %v Body of response was %v", response.Status, string(body))
 	}
 
 	slog.Info(fmt.Sprintf("Response from GetNetwork endpoint was: %v", string(body)))
