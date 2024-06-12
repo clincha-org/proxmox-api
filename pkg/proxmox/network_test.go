@@ -1,6 +1,7 @@
 package proxmox
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -27,50 +28,6 @@ func TestGetDefaultInterface(t *testing.T) {
 	}
 }
 
-// https://github.com/clincha-org/proxmox-api/issues/11
-func TestNetworkUpdateWithGolangZeroValues(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nodes, err := client.GetNodes()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	node := &nodes[0]
-
-	request := NetworkRequest{
-		Interface: "vmbr22",
-		Type:      "bridge",
-		VlanID:    2,
-	}
-
-	_, err = client.CreateNetwork(node, &request)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		_ = client.DeleteNetwork(node, "vmbr22")
-	})
-
-	request = NetworkRequest{
-		Interface: "vmbr22",
-		Type:      "bridge",
-		VlanID:    0,
-	}
-
-	network, err := client.UpdateNetwork(node, &request)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if network.VlanID != 2 {
-		t.Fatalf("Expected VLAN ID to be 2, got %v instead", network.VlanID)
-	}
-}
-
 func TestNetworkNetmaskUpdate(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
@@ -84,11 +41,13 @@ func TestNetworkNetmaskUpdate(t *testing.T) {
 
 	node := &nodes[0]
 
+	TestAddress := "10.0.3.13"
+	TestNetmask := "255.255.255.0"
 	request := NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		Address:   "10.0.3.13",
-		Netmask:   "255.255.255.0",
+		Address:   &TestAddress,
+		Netmask:   &TestNetmask,
 	}
 
 	network, err := client.CreateNetwork(node, &request)
@@ -99,15 +58,16 @@ func TestNetworkNetmaskUpdate(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.Netmask != "255.255.255.0" {
-		t.Fatalf("Expected netmask to be 255.255.255.0, got %v instead", network.Netmask)
+	if network.Netmask != TestNetmask {
+		t.Fatalf("Expected netmask to be %v, got %v instead", TestNetmask, network.Netmask)
 	}
 
+	TestNetmask = "255.255.255.252"
 	request = NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		Address:   "10.0.3.13",
-		Netmask:   "255.255.255.252",
+		Address:   &TestAddress,
+		Netmask:   &TestNetmask,
 	}
 
 	network, err = client.UpdateNetwork(node, &request)
@@ -115,8 +75,8 @@ func TestNetworkNetmaskUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if network.Netmask != "255.255.255.252" {
-		t.Fatalf("Expected netmask to be 255.255.255.252, got %v instead", network.Netmask)
+	if network.Netmask != TestNetmask {
+		t.Fatalf("Expected netmask to be %v, got %v instead", TestNetmask, network.Netmask)
 	}
 }
 
@@ -133,10 +93,11 @@ func TestNetworkCIDRUpdate(t *testing.T) {
 
 	node := &nodes[0]
 
+	TestCIDR := "10.0.3.13/24"
 	request := NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		CIDR:      "10.0.3.13/24",
+		CIDR:      &TestCIDR,
 	}
 
 	network, err := client.CreateNetwork(node, &request)
@@ -147,19 +108,21 @@ func TestNetworkCIDRUpdate(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.Address != "10.0.3.13" {
-		t.Fatalf("Expected network address to be 10.0.3.13, got %v instead", network.Address)
+	if network.Address != strings.Split(TestCIDR, "/")[0] {
+		t.Fatalf("Expected network address to be %v, got %v instead", strings.Split(TestCIDR, "/")[0], network.Address)
 	}
 
 	if network.Netmask != "255.255.255.0" {
 		t.Fatalf("Expected netmask to be 255.255.255.0, got %v instead", network.Netmask)
 	}
 
+	TestAddress := "10.0.3.13"
+	TestNetmask := "255.255.255.252"
 	request = NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		Address:   "10.0.3.13",
-		Netmask:   "255.255.255.252",
+		Address:   &TestAddress,
+		Netmask:   &TestNetmask,
 	}
 
 	network, err = client.UpdateNetwork(node, &request)
@@ -251,11 +214,13 @@ func TestNetworkBridgePorts(t *testing.T) {
 		_ = client.DeleteNetwork(node, "enp0s4")
 	})
 
+	TestCIDR := "10.0.3.13/24"
+	TestBridgePorts := "enp0s4"
 	request = NetworkRequest{
 		Interface:   "vmbr22",
 		Type:        "bridge",
-		CIDR:        "10.0.3.13/24",
-		BridgePorts: "enp0s4",
+		CIDR:        &TestCIDR,
+		BridgePorts: &TestBridgePorts,
 	}
 
 	network, err = client.CreateNetwork(node, &request)
@@ -266,8 +231,8 @@ func TestNetworkBridgePorts(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.BridgePorts != "enp0s4" {
-		t.Fatalf("Expected bridge port to be enp0s4, got %v instead", network.BridgePorts)
+	if network.BridgePorts != TestBridgePorts {
+		t.Fatalf("Expected bridge port to be %v, got %v instead", TestBridgePorts, network.BridgePorts)
 	}
 }
 
@@ -284,13 +249,13 @@ func TestNetworkOmittedFields(t *testing.T) {
 
 	node := &nodes[0]
 
-	autostart := true
-	comments := "Test network"
+	TestAutostart := true
+	TestComments := "test comments"
 	request := NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		AutoStart: &autostart,
-		Comments:  &comments,
+		AutoStart: &TestAutostart,
+		Comments:  &TestComments,
 	}
 
 	network, err := client.CreateNetwork(node, &request)
@@ -303,8 +268,8 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
-	if network.Comments != comments {
-		t.Fatalf("Expected network comments to be %v, got %v instead", comments, network.Comments)
+	if network.Comments != TestComments {
+		t.Fatalf("Expected network comments to be %v, got %v instead", TestComments, network.Comments)
 	}
 
 	request = NetworkRequest{
@@ -319,17 +284,17 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
-	if network.Comments != comments {
-		t.Fatalf("Expected network comments to be %v, got %v instead", comments, network.Comments)
+	if network.Comments != TestComments {
+		t.Fatalf("Expected network comments to be %v, got %v instead", TestComments, network.Comments)
 	}
 
-	autostart = false
-	comments = ""
+	TestAutostart = false
+	TestComments = ""
 	request = NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		AutoStart: &autostart,
-		Comments:  &comments,
+		AutoStart: &TestAutostart,
+		Comments:  &TestComments,
 	}
 
 	network, err = client.UpdateNetwork(node, &request)
@@ -357,11 +322,13 @@ func TestSubnetMaskReturnedInSameFormat(t *testing.T) {
 
 	node := &nodes[0]
 
+	TestAddress := "10.1.2.3"
+	TestNetmask := "255.255.255.0"
 	request := NetworkRequest{
 		Interface: "vmbr22",
 		Type:      "bridge",
-		Address:   "10.1.2.3",
-		Netmask:   "255.255.255.0",
+		Address:   &TestAddress,
+		Netmask:   &TestNetmask,
 	}
 
 	network, err := client.CreateNetwork(node, &request)
@@ -372,7 +339,7 @@ func TestSubnetMaskReturnedInSameFormat(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.Netmask != "255.255.255.0" {
-		t.Fatalf("Expected network mask to be 255.255.255.0, got %v instead", network.Autostart)
+	if network.Netmask != TestNetmask {
+		t.Fatalf("Expected network mask to be %v, got %v instead", TestNetmask, network.Autostart)
 	}
 }

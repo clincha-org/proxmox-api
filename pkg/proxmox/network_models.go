@@ -20,18 +20,18 @@ type NetworkResponse struct {
 
 // NetworkRequest The request that Proxmox expects when creating and modifying Networks
 type NetworkRequest struct {
-	Interface       string  `json:"iface,omitempty"`
-	Type            string  `json:"type,omitempty"`
-	Address         string  `json:"address,omitempty"`
+	Interface       string  `json:"iface"`
+	Type            string  `json:"type"`
+	Address         *string `json:"address,omitempty"`
 	AutoStart       *bool   `json:"autostart,omitempty"`
-	BridgePorts     string  `json:"bridge_ports,omitempty"`
+	BridgePorts     *string `json:"bridge_ports,omitempty"`
 	BridgeVlanAware *bool   `json:"bridge_vlan_aware,omitempty"`
-	CIDR            string  `json:"cidr,omitempty"`
+	CIDR            *string `json:"cidr,omitempty"`
 	Comments        *string `json:"comments,omitempty"`
-	Gateway         string  `json:"gateway,omitempty"`
-	MTU             int64   `json:"mtu,omitempty"`
-	Netmask         string  `json:"netmask,omitempty"` // Subnet Mask Notation
-	VlanID          int64   `json:"vlan-id,string,omitempty"`
+	Gateway         *string `json:"gateway,omitempty"`
+	MTU             *int64  `json:"mtu,omitempty"`
+	Netmask         *string `json:"netmask,omitempty"` // Subnet Mask Notation
+	VlanID          *int64  `json:"vlan-id,string,omitempty"`
 }
 
 // Network The structure that represents a Proxmox node network
