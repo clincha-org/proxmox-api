@@ -27,7 +27,7 @@ type NetworkRequest struct {
 	BridgePorts     *string `json:"bridge_ports,omitempty"`
 	BridgeVlanAware *bool   `json:"bridge_vlan_aware,omitempty"`
 	CIDR            *string `json:"cidr,omitempty"`
-	Comments        *string `json:"comments,omitempty"`
+	Comments        string  `json:"comments"`
 	Gateway         *string `json:"gateway,omitempty"`
 	MTU             *int64  `json:"mtu,omitempty"`
 	Netmask         *string `json:"netmask,omitempty"` // Subnet Mask Notation
@@ -43,7 +43,7 @@ type Network struct {
 	BridgePorts     *string `json:"bridge_ports,omitempty"`
 	BridgeVlanAware int64   `json:"bridge_vlan_aware,omitempty"`
 	CIDR            *string `json:"cidr,omitempty"`
-	Comments        *string `json:"comments,omitempty"`
+	Comments        string  `json:"comments"`
 	Gateway         *string `json:"gateway,omitempty"`
 	MTU             *int64  `json:"mtu,string,omitempty"`
 	Netmask         *string `json:"netmask,omitempty"` // CIDR Notation
