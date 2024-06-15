@@ -167,7 +167,7 @@ func TestNetworkAutostart(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if *network.Autostart != 1 {
+	if network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
 
@@ -183,8 +183,8 @@ func TestNetworkAutostart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if network.Autostart != nil {
-		t.Fatalf("Expected network autostart to be nil, got %v instead", network.Autostart)
+	if network.Autostart != 0 {
+		t.Fatalf("Expected network autostart to be 0, got %v instead", network.Autostart)
 	}
 }
 
@@ -265,7 +265,7 @@ func TestNetworkOmittedFields(t *testing.T) {
 	t.Cleanup(func() {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
-	if *network.Autostart != 1 {
+	if network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
 	if *network.Comments != TestComments {
@@ -281,7 +281,7 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *network.Autostart != 1 {
+	if network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
 	if *network.Comments != TestComments {
@@ -301,8 +301,8 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if network.Autostart != nil {
-		t.Fatalf("Expected network autostart to be nil, got %v instead", network.Autostart)
+	if network.Autostart != 0 {
+		t.Fatalf("Expected network autostart to be 0, got %v instead", network.Autostart)
 	}
 	if network.Comments != nil {
 		t.Fatalf("Expected network comments to be nil, got %v instead", network.Comments)
