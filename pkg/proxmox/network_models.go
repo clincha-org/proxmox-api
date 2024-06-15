@@ -38,16 +38,16 @@ type NetworkRequest struct {
 type Network struct {
 	Interface       string  `json:"iface,omitempty"`
 	Type            string  `json:"type,omitempty"`
-	Address         string  `json:"address,omitempty"`
-	Autostart       int64   `json:"autostart,omitempty"`
-	BridgePorts     string  `json:"bridge_ports,omitempty"`
-	BridgeVlanAware int64   `json:"bridge_vlan_aware,omitempty"`
-	CIDR            string  `json:"cidr,omitempty"`
-	Comments        string  `json:"comments,omitempty"`
+	Address         *string `json:"address,omitempty"`
+	Autostart       *int64  `json:"autostart,omitempty"`
+	BridgePorts     *string `json:"bridge_ports,omitempty"`
+	BridgeVlanAware *int64  `json:"bridge_vlan_aware,omitempty"`
+	CIDR            *string `json:"cidr,omitempty"`
+	Comments        *string `json:"comments,omitempty"`
 	Gateway         *string `json:"gateway,omitempty"`
-	MTU             int64   `json:"mtu,string,omitempty"`
-	Netmask         string  `json:"netmask,omitempty"` // CIDR Notation
-	VlanID          int64   `json:"vlan-id,string,omitempty"`
+	MTU             *int64  `json:"mtu,string,omitempty"`
+	Netmask         *string `json:"netmask,omitempty"` // CIDR Notation
+	VlanID          *int64  `json:"vlan-id,string,omitempty"`
 	// Computed values
 	Families []string `json:"families,omitempty"`
 	Method   string   `json:"method,omitempty"`

@@ -98,7 +98,7 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 	network.Interface = networkName
 
 	// Convert the network CIDR into subnet mask format
-	if network.Netmask != "" {
+	if network.Netmask != nil {
 		network.Netmask, err = ConvertCIDRToNetmask(network.Netmask)
 		if err != nil {
 			return network, fmt.Errorf("unable to convert netmask CIDR value %v to valid subnet mask, error was: %v", network.Netmask, err)
@@ -106,8 +106,8 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 	}
 
 	// Remove the newline at the end of the comment
-	if network.Comments != "" {
-		network.Comments = strings.Trim(network.Comments, "\n")
+	if network.Comments != nil {
+		*network.Comments = strings.Trim(*network.Comments, "\n")
 	}
 
 	slog.Info(fmt.Sprintf("Cleaned network object is: %+v", network))
@@ -270,11 +270,12 @@ func (client *Client) ReloadNetwork(node *Node) error {
 	return nil
 }
 
-func ConvertCIDRToNetmask(cidr string) (string, error) {
-	cidrInt, err := strconv.Atoi(cidr)
+func ConvertCIDRToNetmask(cidr *string) (*string, error) {
+	cidrInt, err := strconv.Atoi(*cidr)
 	if err != nil {
 		return cidr, err
 	}
 	var mask uint32 = 0xFFFFFFFF << (32 - uint32(cidrInt))
-	return fmt.Sprintf("%d.%d.%d.%d", byte(mask>>24), byte(mask>>16), byte(mask>>8), byte(mask)), nil
+	var netmask = fmt.Sprintf("%d.%d.%d.%d", byte(mask>>24), byte(mask>>16), byte(mask>>8), byte(mask))
+	return &netmask, nil
 }

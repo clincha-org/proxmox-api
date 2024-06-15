@@ -58,7 +58,7 @@ func TestNetworkNetmaskUpdate(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.Netmask != TestNetmask {
+	if *network.Netmask != TestNetmask {
 		t.Fatalf("Expected netmask to be %v, got %v instead", TestNetmask, network.Netmask)
 	}
 
@@ -75,7 +75,7 @@ func TestNetworkNetmaskUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if network.Netmask != TestNetmask {
+	if *network.Netmask != TestNetmask {
 		t.Fatalf("Expected netmask to be %v, got %v instead", TestNetmask, network.Netmask)
 	}
 }
@@ -108,11 +108,11 @@ func TestNetworkCIDRUpdate(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.Address != strings.Split(TestCIDR, "/")[0] {
+	if *network.Address != strings.Split(TestCIDR, "/")[0] {
 		t.Fatalf("Expected network address to be %v, got %v instead", strings.Split(TestCIDR, "/")[0], network.Address)
 	}
 
-	if network.Netmask != "255.255.255.0" {
+	if *network.Netmask != "255.255.255.0" {
 		t.Fatalf("Expected netmask to be 255.255.255.0, got %v instead", network.Netmask)
 	}
 
@@ -130,11 +130,11 @@ func TestNetworkCIDRUpdate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if network.CIDR != "10.0.3.13/30" {
+	if *network.CIDR != "10.0.3.13/30" {
 		t.Fatalf("Expected CIDR to be 10.0.3.13/30, got %v instead", network.CIDR)
 	}
 
-	if network.Netmask != "255.255.255.252" {
+	if *network.Netmask != "255.255.255.252" {
 		t.Fatalf("Expected netmask to be 255.255.255.252, got %v instead", network.Netmask)
 	}
 }
@@ -167,7 +167,7 @@ func TestNetworkAutostart(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.Autostart != 1 {
+	if *network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
 
@@ -183,8 +183,8 @@ func TestNetworkAutostart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if network.Autostart != 0 {
-		t.Fatalf("Expected network autostart to be 0, got %v instead", network.Autostart)
+	if network.Autostart != nil {
+		t.Fatalf("Expected network autostart to be nil, got %v instead", network.Autostart)
 	}
 }
 
@@ -231,7 +231,7 @@ func TestNetworkBridgePorts(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.BridgePorts != TestBridgePorts {
+	if *network.BridgePorts != TestBridgePorts {
 		t.Fatalf("Expected bridge port to be %v, got %v instead", TestBridgePorts, network.BridgePorts)
 	}
 }
@@ -265,10 +265,10 @@ func TestNetworkOmittedFields(t *testing.T) {
 	t.Cleanup(func() {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
-	if network.Autostart != 1 {
+	if *network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
-	if network.Comments != TestComments {
+	if *network.Comments != TestComments {
 		t.Fatalf("Expected network comments to be %v, got %v instead", TestComments, network.Comments)
 	}
 
@@ -281,10 +281,10 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if network.Autostart != 1 {
+	if *network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
-	if network.Comments != TestComments {
+	if *network.Comments != TestComments {
 		t.Fatalf("Expected network comments to be %v, got %v instead", TestComments, network.Comments)
 	}
 
@@ -301,11 +301,11 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if network.Autostart != 0 {
-		t.Fatalf("Expected network autostart to be 0, got %v instead", network.Autostart)
+	if network.Autostart != nil {
+		t.Fatalf("Expected network autostart to be nil, got %v instead", network.Autostart)
 	}
-	if network.Comments != "" {
-		t.Fatalf("Expected network comments to be empty, got %v instead", network.Comments)
+	if network.Comments != nil {
+		t.Fatalf("Expected network comments to be nil, got %v instead", network.Comments)
 	}
 }
 
@@ -339,7 +339,7 @@ func TestSubnetMaskReturnedInSameFormat(t *testing.T) {
 		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if network.Netmask != TestNetmask {
+	if *network.Netmask != TestNetmask {
 		t.Fatalf("Expected network mask to be %v, got %v instead", TestNetmask, network.Autostart)
 	}
 }
