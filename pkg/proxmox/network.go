@@ -106,8 +106,9 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 	}
 
 	// Remove the newline at the end of the comment
-	if network.Comments != "" {
-		network.Comments = strings.Trim(network.Comments, "\n")
+	if network.Comments != nil && *network.Comments != "" {
+		trimmedString := strings.Trim(*network.Comments, "\n")
+		network.Comments = &trimmedString
 	}
 
 	slog.Info(fmt.Sprintf("Cleaned network object is: %+v", network))

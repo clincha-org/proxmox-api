@@ -255,7 +255,7 @@ func TestNetworkOmittedFields(t *testing.T) {
 		Interface: "vmbr22",
 		Type:      "bridge",
 		AutoStart: &TestAutostart,
-		Comments:  TestComments,
+		Comments:  &TestComments,
 	}
 
 	network, err := client.CreateNetwork(node, &request)
@@ -268,7 +268,7 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
-	if network.Comments != TestComments {
+	if *network.Comments != TestComments {
 		t.Fatalf("Expected network comments to be %v, got %v instead", TestComments, network.Comments)
 	}
 
@@ -284,7 +284,7 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if network.Autostart != 1 {
 		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
-	if network.Comments != "" {
+	if *network.Comments != TestComments {
 		t.Fatalf("Expected network comments to be %v, got %v instead", TestComments, network.Comments)
 	}
 
@@ -294,7 +294,7 @@ func TestNetworkOmittedFields(t *testing.T) {
 		Interface: "vmbr22",
 		Type:      "bridge",
 		AutoStart: &TestAutostart,
-		Comments:  TestComments,
+		Comments:  &TestComments,
 	}
 
 	network, err = client.UpdateNetwork(node, &request)
@@ -304,8 +304,8 @@ func TestNetworkOmittedFields(t *testing.T) {
 	if network.Autostart != 0 {
 		t.Fatalf("Expected network autostart to be 0, got %v instead", network.Autostart)
 	}
-	if network.Comments != "" {
-		t.Fatalf("Expected network comments to be empty, got %v instead", network.Comments)
+	if network.Comments != nil {
+		t.Fatalf("Expected network comments to be nil, got %v instead", network.Comments)
 	}
 }
 
