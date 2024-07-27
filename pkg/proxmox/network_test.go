@@ -343,3 +343,34 @@ func TestSubnetMaskReturnedInSameFormat(t *testing.T) {
 		t.Fatalf("Expected network mask to be %v, got %v instead", TestNetmask, network.Autostart)
 	}
 }
+
+func TestNetworkWithOnlyName(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node := &nodes[0]
+
+	request := NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+	}
+
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
+
+	if network.Interface != "vmbr22" {
+		t.Fatalf("Expected network interface to be vmbr22, got %v instead", network.Interface)
+	}
+}
