@@ -1,13 +1,11 @@
 package proxmox
 
 import (
-	"slices"
+	"strings"
 	"testing"
 )
 
-const PrimaryVirtualBridgeName = "vmbr0"
-
-func TestGetNetworks(t *testing.T) {
+func TestGetDefaultInterface(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Fatal(err)
@@ -18,105 +16,71 @@ func TestGetNetworks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	networks, err := client.GetNetworks(&nodes[0])
+	node := &nodes[0]
+
+	network, err := client.GetNetwork(node, "vmbr0")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(networks) <= 0 {
-		t.Error("No networks returned by GetNetwork")
+	if network.Interface != "vmbr0" {
+		t.Errorf("Incorrect interface returned. Expected vmbr0, got %v", network.Interface)
+	}
+}
+
+func TestNetworkNetmaskUpdate(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	PrimaryVirtualBridgeIndex := slices.IndexFunc(networks, func(network Network) bool {
-		return network.Interface == PrimaryVirtualBridgeName
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node := &nodes[0]
+
+	TestAddress := "10.0.3.13"
+	TestNetmask := "255.255.255.0"
+	request := NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		Address:   &TestAddress,
+		Netmask:   &TestNetmask,
+	}
+
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
 	})
 
-	if PrimaryVirtualBridgeIndex == -1 {
-		t.Errorf("Unable to find primary virtual bridge interface called %q", PrimaryVirtualBridgeName)
+	if *network.Netmask != TestNetmask {
+		t.Fatalf("Expected netmask to be %v, got %v instead", TestNetmask, network.Netmask)
 	}
 
-	VirtualBridge := networks[PrimaryVirtualBridgeIndex]
-
-	if VirtualBridge.Interface != PrimaryVirtualBridgeName {
-		t.Errorf("Expected first network to be called %q. Got %q instead", PrimaryVirtualBridgeName, VirtualBridge.Interface)
-	}
-
-	if VirtualBridge.Type != "bridge" {
-		t.Errorf("Expected first network to be of type bridge. Got type %q instead", VirtualBridge.Type)
-	}
-}
-
-func TestGetNetwork(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nodes, err := client.GetNodes()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	network, err := client.GetNetwork(&nodes[0], PrimaryVirtualBridgeName)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if network.Interface != PrimaryVirtualBridgeName {
-		t.Errorf("Expected first network to be called %q. Got %q instead", PrimaryVirtualBridgeName, network.Interface)
-	}
-
-	if network.Type != "bridge" {
-		t.Errorf("Expected first network to be of type bridge. Got type %q instead", network.Type)
-	}
-
-	if network.Method != "static" {
-		t.Errorf("Expected first network method to be static. Got %q instead", network.Method)
-	}
-}
-
-func TestCreateDeleteNetworkBridge(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nodes, err := client.GetNodes()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	testInterface := "vmbr99"
-
-	networkRequest := NetworkRequest{
-		Interface: testInterface,
+	TestNetmask = "255.255.255.252"
+	request = NetworkRequest{
+		Interface: "vmbr22",
 		Type:      "bridge",
+		Address:   &TestAddress,
+		Netmask:   &TestNetmask,
 	}
 
-	network, err := client.CreateNetwork(&nodes[0], &networkRequest)
+	network, err = client.UpdateNetwork(node, &request)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	if network.Interface != testInterface {
-		t.Errorf("Expected network to be called %q. Got %q instead", testInterface, network.Interface)
-	}
-
-	if network.Type != "bridge" {
-		t.Errorf("Expected network to be of type bridge. Got type %q instead", network.Type)
-	}
-
-	if network.Method != "manual" {
-		t.Errorf("Expected network method to be manual. Got %q instead", network.Method)
-	}
-
-	err = client.DeleteNetwork(&nodes[0], network.Interface)
-	if err != nil {
-		t.Error(err)
+	if *network.Netmask != TestNetmask {
+		t.Fatalf("Expected netmask to be %v, got %v instead", TestNetmask, network.Netmask)
 	}
 }
 
-func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
+func TestNetworkCIDRUpdate(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Fatal(err)
@@ -127,83 +91,104 @@ func TestCreateUpdateDeleteNetworkBridge(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	testInterface := "vmbr47"
-	testCIDR := "10.0.3.15/14"
-	//testComments := "testComment"
+	node := &nodes[0]
 
-	networkRequest := NetworkRequest{
+	TestCIDR := "10.0.3.13/24"
+	request := NetworkRequest{
+		Interface: "vmbr22",
 		Type:      "bridge",
-		Interface: testInterface,
+		CIDR:      &TestCIDR,
 	}
 
-	network, err := client.CreateNetwork(&nodes[0], &networkRequest)
+	network, err := client.CreateNetwork(node, &request)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
+
+	if *network.Address != strings.Split(TestCIDR, "/")[0] {
+		t.Fatalf("Expected network address to be %v, got %v instead", strings.Split(TestCIDR, "/")[0], network.Address)
 	}
 
-	if network.Interface != testInterface {
-		t.Errorf("Expected network to be called %q. Got %q instead", testInterface, network.Interface)
+	if *network.Netmask != "255.255.255.0" {
+		t.Fatalf("Expected netmask to be 255.255.255.0, got %v instead", network.Netmask)
 	}
 
-	if network.Type != "bridge" {
-		t.Errorf("Expected network to be of type bridge. Got type %q instead", network.Type)
+	TestAddress := "10.0.3.13"
+	TestNetmask := "255.255.255.252"
+	request = NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		Address:   &TestAddress,
+		Netmask:   &TestNetmask,
 	}
 
-	if network.Method != "manual" {
-		t.Errorf("Expected network method to be manual. Got %q instead", network.Method)
-	}
-
-	networkRequest = NetworkRequest{
-		Interface: network.Interface,
-		Type:      network.Type,
-		AutoStart: 1,
-		CIDR:      testCIDR,
-	}
-
-	network, err = client.UpdateNetwork(&nodes[0], &networkRequest)
+	network, err = client.UpdateNetwork(node, &request)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
+
+	if *network.CIDR != "10.0.3.13/30" {
+		t.Fatalf("Expected CIDR to be 10.0.3.13/30, got %v instead", network.CIDR)
+	}
+
+	if *network.Netmask != "255.255.255.252" {
+		t.Fatalf("Expected netmask to be 255.255.255.252, got %v instead", network.Netmask)
+	}
+}
+
+func TestNetworkAutostart(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node := &nodes[0]
+
+	autostart := true
+	request := NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		AutoStart: &autostart,
+	}
+
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
 
 	if network.Autostart != 1 {
-		t.Errorf("expected autostart to be 1 but got %v", network.Autostart)
+		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
 
-	if network.CIDR != testCIDR {
-		t.Errorf("expected CIDR to be %v but got %v", testCIDR, network.CIDR)
+	autostart = false
+	request = NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		AutoStart: &autostart,
 	}
 
-	networkRequest = NetworkRequest{
-		Interface: network.Interface,
-		Type:      network.Type,
-		Comments:  "Hello",
-		MTU:       8000,
-	}
-
-	network, err = client.UpdateNetwork(&nodes[0], &networkRequest)
+	network, err = client.UpdateNetwork(node, &request)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	if network.Autostart != 1 {
-		t.Errorf("expected autostart to be 1 but got %v", network.Autostart)
-	}
-
-	if network.CIDR != testCIDR {
-		t.Errorf("expected CIDR to be %v but got %v", testCIDR, network.CIDR)
-	}
-
-	//if network.comments != testComments {
-	//	t.Errorf("expected comments to be %v but got %v", testComments, network.Cidr)
-	//}
-
-	err = client.DeleteNetwork(&nodes[0], testInterface)
-	if err != nil {
-		t.Error(err)
+	if network.Autostart != 0 {
+		t.Fatalf("Expected network autostart to be 0, got %v instead", network.Autostart)
 	}
 }
 
-func TestBondedNetworkConfiguration(t *testing.T) {
+func TestNetworkBridgePorts(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Fatal(err)
@@ -213,69 +198,118 @@ func TestBondedNetworkConfiguration(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	node := &nodes[0]
 
 	request := NetworkRequest{
-		Interface: "eno1",
+		Interface: "enp0s4",
 		Type:      "eth",
-		AutoStart: 1,
 	}
 
-	_, err = client.CreateNetwork(&nodes[0], &request)
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "enp0s4")
+	})
+
+	TestCIDR := "10.0.3.13/24"
+	TestBridgePorts := "enp0s4"
+	request = NetworkRequest{
+		Interface:   "vmbr22",
+		Type:        "bridge",
+		CIDR:        &TestCIDR,
+		BridgePorts: &TestBridgePorts,
+	}
+
+	network, err = client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
+
+	if *network.BridgePorts != TestBridgePorts {
+		t.Fatalf("Expected bridge port to be %v, got %v instead", TestBridgePorts, network.BridgePorts)
+	}
+}
+
+func TestNetworkOmittedFields(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	request.Interface = "eno2"
-	_, err = client.CreateNetwork(&nodes[0], &request)
+	nodes, err := client.GetNodes()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	Interface := "bond1"
-	Type := "bond"
-	OVSBonds := "eno1,eno2"
-	BondMode := "active-backup"
+	node := &nodes[0]
+
+	TestAutostart := true
+	TestComments := "test comments"
+	request := NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		AutoStart: &TestAutostart,
+		Comments:  &TestComments,
+	}
+
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
+	if network.Autostart != 1 {
+		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
+	}
+	if *network.Comments != TestComments {
+		t.Fatalf("Expected network comments to be %v, got %v instead", TestComments, network.Comments)
+	}
 
 	request = NetworkRequest{
-		Interface: Interface,
-		Type:      Type,
-		OVSBonds:  OVSBonds,
-		BondMode:  BondMode,
-	}
-	network, err := client.CreateNetwork(&nodes[0], &request)
-	if err != nil {
-		t.Error(err)
+		Interface: "vmbr22",
+		Type:      "bridge",
 	}
 
-	if network.Interface != Interface {
-		t.Errorf("expected %v for Interface but got %v", Interface, network.Interface)
-	}
-	if network.Type != Type {
-		t.Errorf("expected %v for Type but got %v", Type, network.Type)
-	}
-	if network.OVSBonds != OVSBonds {
-		t.Errorf("expected %v for OVSBonds but got %v", OVSBonds, network.OVSBonds)
-	}
-	if network.BondMode != BondMode {
-		t.Errorf("expected %v for BondMode but got %v", BondMode, network.BondMode)
-	}
-
-	err = client.DeleteNetwork(&nodes[0], "bond1")
+	network, err = client.UpdateNetwork(node, &request)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = client.DeleteNetwork(&nodes[0], "eno1")
-	if err != nil {
-		t.Fatal(err)
+	if network.Autostart != 1 {
+		t.Fatalf("Expected network autostart to be 1, got %v instead", network.Autostart)
 	}
-	err = client.DeleteNetwork(&nodes[0], "eno2")
-	if err != nil {
-		t.Fatal(err)
+	if *network.Comments != TestComments {
+		t.Fatalf("Expected network comments to be %v, got %v instead", TestComments, network.Comments)
 	}
 
+	TestAutostart = false
+	TestComments = ""
+	request = NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+		AutoStart: &TestAutostart,
+		Comments:  &TestComments,
+	}
+
+	network, err = client.UpdateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if network.Autostart != 0 {
+		t.Fatalf("Expected network autostart to be 0, got %v instead", network.Autostart)
+	}
+	if network.Comments != nil {
+		t.Fatalf("Expected network comments to be nil, got %v instead", network.Comments)
+	}
 }
 
-func TestVLANNetworkConfiguration(t *testing.T) {
+func TestSubnetMaskReturnedInSameFormat(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Fatal(err)
@@ -286,23 +320,57 @@ func TestVLANNetworkConfiguration(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	node := &nodes[0]
+
+	TestAddress := "10.1.2.3"
+	TestNetmask := "255.255.255.0"
 	request := NetworkRequest{
-		Interface: "vmbr74",
+		Interface: "vmbr22",
 		Type:      "bridge",
-		VlanID:    3,
+		Address:   &TestAddress,
+		Netmask:   &TestNetmask,
 	}
 
-	network, err := client.CreateNetwork(&nodes[0], &request)
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
+
+	if *network.Netmask != TestNetmask {
+		t.Fatalf("Expected network mask to be %v, got %v instead", TestNetmask, network.Autostart)
+	}
+}
+
+func TestNetworkWithOnlyName(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if network.VlanID != 3 {
-		t.Errorf("expected %v for VlanID but got %v", 3, network.VlanID)
-	}
-
-	err = client.DeleteNetwork(&nodes[0], "vmbr74")
+	nodes, err := client.GetNodes()
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	node := &nodes[0]
+
+	request := NetworkRequest{
+		Interface: "vmbr22",
+		Type:      "bridge",
+	}
+
+	network, err := client.CreateNetwork(node, &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = client.DeleteNetwork(node, "vmbr22")
+	})
+
+	if network.Interface != "vmbr22" {
+		t.Fatalf("Expected network interface to be vmbr22, got %v instead", network.Interface)
 	}
 }
