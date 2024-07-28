@@ -42,7 +42,7 @@ func (client *Client) GetNodes() ([]Node, error) {
 		return node, fmt.Errorf("GetNodes-status-error: %s %s", response.Status, body)
 	}
 
-	nodeModel := NodeModel{}
+	nodeModel := NodeResponse{}
 	err = json.Unmarshal(body, &nodeModel)
 	if err != nil {
 		return node, fmt.Errorf("GetNodes-unmarshal-response: %w", err)

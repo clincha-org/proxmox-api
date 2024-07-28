@@ -1,6 +1,5 @@
 package proxmox
 
-// The models in this file represent the Network endpoint in Proxmox
 // The response from the Proxmox server is wrapped in an JSON object called "data".
 // The Response structs deal with unwrapping these objects.
 
@@ -16,7 +15,7 @@ type NetworkResponse struct {
 
 // The NetworkRequest struct handles the create and update requests we need to send to the Proxmox server.
 // This is different from the Network structure because the API endpoints don't accept the same fields they return.
-// I have written more about it here: https://github.com/clincha-org/proxmox-api/issues/5
+// https://github.com/clincha-org/proxmox-api/issues/5
 
 // NetworkRequest The request that Proxmox expects when creating and modifying Networks
 type NetworkRequest struct {

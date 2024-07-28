@@ -1,6 +1,6 @@
 package proxmox
 
-type NodeModel struct {
+type NodeResponse struct {
 	Data []Node `json:"data"`
 }
 
