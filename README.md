@@ -2,7 +2,7 @@
 
 ## Mantras
 
-The API must work like Terraform. If a value is not set, the zero value is assumed.
+The API must work like Terraform. If a value is not set, nothing is sent to the API.
 
 ## Attribute Flow
 
@@ -18,13 +18,12 @@ For this example I will use the `comment` attribute of the `Network` object.
 
 1. The `comment` attribute is set to "test" in the `Network` object and sent to the API.
 2. The API will return the `Network` object with the `comment` attribute set to "test".
-3. The `comment` attribute is set to "" in the `Network` object and sent to the API.
-4. The API will return the `Network` object with the `comment` attribute set to "".
-5. The `comment` attribute is not set (`nil`) in the `Network` object and sent to the API.
+3. The `comment` attribute is not set (`nil`) in the `Network` object and sent to the API.
+4. The API will return the `Network` object with the `comment` attribute set to "test".
+5. The `comment` attribute is set to "" in the `Network` object and sent to the API.
 6. The API will return the `Network` object with the `comment` attribute set to "".
 
-This example assumes that we are using a pointer for the comment attribute. If we do not use a pointer, then we do not need to worry about the `nil` value. 
-
+For attributes like these, we use a pointer, so we can differentiate between the zero value and `nil`.
 ```text
 "test" --> create --> "test"
 "test" <-- read <-- "test"
