@@ -4,8 +4,8 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -32,14 +32,13 @@ func NewClient(Host string, Username string, Password string) (*Client, error) {
 		Host: DefaultHostURL,
 	}
 
-	if Host != "" {
-		client.Host = Host
-	} else {
-		slog.Warn("Using default DefaultHostURL as none was specified")
+	if Host == "" {
+		return &client, fmt.Errorf("NewClient-Host: %w", errors.New("host is required"))
 	}
+	client.Host = Host
 
 	if Username == "" || Password == "" {
-		return &client, errors.New("TestUsername and TestPassword are required")
+		return &client, fmt.Errorf("NewClient-Username-Password: %w", errors.New("username and password are required"))
 	} else {
 		client.Username = Username
 		client.Password = Password
@@ -47,7 +46,7 @@ func NewClient(Host string, Username string, Password string) (*Client, error) {
 
 	ticket, err := client.Login()
 	if err != nil {
-		return &client, err
+		return &client, fmt.Errorf("NewClient-Login: %w", err)
 	}
 
 	client.Ticket = ticket
@@ -74,26 +73,26 @@ func (client *Client) Login() (*Ticket, error) {
 		strings.NewReader(authPayload.Encode()),
 	)
 	if err != nil {
-		return &ticket, err
-	}
-
-	if response.StatusCode != http.StatusOK {
-		return &ticket, errors.New(response.Status)
+		return &ticket, fmt.Errorf("Login-do-request: %w", err)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return &ticket, err
-	}
-
-	err = json.Unmarshal(body, &ticket)
-	if err != nil {
-		return &ticket, err
+		return &ticket, fmt.Errorf("Login-read-response: %w", err)
 	}
 
 	err = response.Body.Close()
 	if err != nil {
-		return &ticket, err
+		return &ticket, fmt.Errorf("Login-close-response: %w", err)
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return &ticket, fmt.Errorf("Login-status-error: %s %s", response.Status, body)
+	}
+
+	err = json.Unmarshal(body, &ticket)
+	if err != nil {
+		return &ticket, fmt.Errorf("Login-unmarshal-response: %w", err)
 	}
 
 	return &ticket, nil

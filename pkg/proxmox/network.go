@@ -35,6 +35,11 @@ func (client *Client) GetNetworks(node *Node) ([]Network, error) {
 		return nil, fmt.Errorf("GetNetworks-read-response: %w", err)
 	}
 
+	err = response.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("GetNetworks-close-response: %w", err)
+	}
+
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("GetNetworks-status-error: %s %s", response.Status, body)
 	}
@@ -71,6 +76,11 @@ func (client *Client) GetNetwork(node *Node, networkName string) (Network, error
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return network, fmt.Errorf("GetNetwork-read-response: %w", err)
+	}
+
+	err = response.Body.Close()
+	if err != nil {
+		return network, fmt.Errorf("GetNetwork-close-response: %w", err)
 	}
 
 	if response.StatusCode != http.StatusOK {
@@ -132,6 +142,11 @@ func (client *Client) CreateNetwork(node *Node, networkRequest *NetworkRequest) 
 		return Network{}, fmt.Errorf("CreateNetwork-read-response: %w", err)
 	}
 
+	err = response.Body.Close()
+	if err != nil {
+		return Network{}, fmt.Errorf("CreateNetwork-close-response: %w", err)
+	}
+
 	if response.StatusCode != http.StatusOK {
 		return Network{}, fmt.Errorf("CreateNetwork-status-error: %s %s", response.Status, body)
 	}
@@ -173,6 +188,11 @@ func (client *Client) UpdateNetwork(node *Node, networkRequest *NetworkRequest) 
 		return Network{}, fmt.Errorf("UpdateNetwork-read-response: %w", err)
 	}
 
+	err = response.Body.Close()
+	if err != nil {
+		return Network{}, fmt.Errorf("UpdateNetwork-close-response: %w", err)
+	}
+
 	if response.StatusCode != http.StatusOK {
 		return Network{}, fmt.Errorf("UpdateNetwork-status-error: %s %s", response.Status, body)
 	}
@@ -208,6 +228,11 @@ func (client *Client) DeleteNetwork(node *Node, network string) error {
 		return fmt.Errorf("DeleteNetwork-read-response: %w", err)
 	}
 
+	err = response.Body.Close()
+	if err != nil {
+		return fmt.Errorf("DeleteNetwork-close-response: %w", err)
+	}
+
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("DeleteNetwork-status-error: %s %s", response.Status, body)
 	}
@@ -241,6 +266,11 @@ func (client *Client) ReloadNetwork(node *Node) error {
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return fmt.Errorf("ReloadNetwork-read-response: %w", err)
+	}
+
+	err = response.Body.Close()
+	if err != nil {
+		return fmt.Errorf("ReloadNetwork-close-response: %w", err)
 	}
 
 	if response.StatusCode != http.StatusOK {
