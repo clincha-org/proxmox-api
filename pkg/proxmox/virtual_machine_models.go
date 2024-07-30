@@ -1,7 +1,11 @@
 package proxmox
 
 type VirtualMachineRequest struct {
-	VMID int `json:"vmid"`
+	VMID         int    `json:"vmid"`
+	Cdrom        string `json:"cdrom"`
+	SCSI1        string `json:"scsi1"`
+	Net1         string `json:"net1"`
+	SCSIHardware string `json:"scsihw"`
 }
 
 type VirtualMachinesResponse struct {
@@ -44,4 +48,30 @@ type VirtualMachineConfig struct {
 	Digest  string `json:"digest"`
 	Scsihw  string `json:"scsihw"`
 	Memory  string `json:"memory"`
+}
+
+type VirtualMachineStatusResponse struct {
+	Data VirtualMachineStatus `json:"data"`
+}
+
+type VirtualMachineStatus struct {
+	Diskread       int     `json:"diskread"`
+	Maxmem         int     `json:"maxmem"`
+	Mem            int     `json:"mem"`
+	Disk           int     `json:"disk"`
+	Netin          int     `json:"netin"`
+	Cpus           float32 `json:"cpus"`
+	Maxdisk        int64   `json:"maxdisk"`
+	Balloon        int     `json:"balloon"`
+	RunningMachine string  `json:"running-machine"`
+	RunningQemu    string  `json:"running-qemu"`
+	Status         string  `json:"status"`
+	Diskwrite      int     `json:"diskwrite"`
+	Cpu            float32 `json:"cpu"`
+	Name           string  `json:"name"`
+	Qmpstatus      string  `json:"qmpstatus"`
+	Pid            int     `json:"pid"`
+	Vmid           int     `json:"vmid"`
+	Netout         int     `json:"netout"`
+	Uptime         int     `json:"uptime"`
 }
