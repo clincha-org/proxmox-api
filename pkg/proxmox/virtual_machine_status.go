@@ -9,10 +9,10 @@ import (
 	"strconv"
 )
 
-func (client *Client) GetVMStatus(node *Node, vmid int) (VirtualMachineStatus, error) {
+func (client *Client) GetVMStatus(node string, vmid int) (VirtualMachineStatus, error) {
 	request, err := http.NewRequest(
 		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node.Node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/current",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/current",
 		nil,
 	)
 	if err != nil {
@@ -37,7 +37,7 @@ func (client *Client) GetVMStatus(node *Node, vmid int) (VirtualMachineStatus, e
 		return VirtualMachineStatus{}, fmt.Errorf("GetVMStatus-close-response: %w", err)
 	}
 
-	slog.Debug("api-response", "method", "GetVMStatus", "node", node.Node, "status", response.Status, "response", string(body))
+	slog.Debug("api-response", "method", "GetVMStatus", "node", node, "status", response.Status, "response", string(body))
 
 	if response.StatusCode != http.StatusOK {
 		return VirtualMachineStatus{}, fmt.Errorf("GetVMStatus-status-error: %s %s", response.Status, body)
@@ -52,10 +52,10 @@ func (client *Client) GetVMStatus(node *Node, vmid int) (VirtualMachineStatus, e
 	return vmStatus.Data, nil
 }
 
-func (client *Client) StopVM(node *Node, vmid int) error {
+func (client *Client) StopVM(node string, vmid int) error {
 	request, err := http.NewRequest(
 		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node.Node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/stop",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/stop",
 		nil,
 	)
 	if err != nil {
@@ -80,7 +80,7 @@ func (client *Client) StopVM(node *Node, vmid int) error {
 		return fmt.Errorf("StopVM-close-response: %w", err)
 	}
 
-	slog.Debug("api-response", "method", "StopVM", "node", node.Node, "status", response.Status, "response", string(body))
+	slog.Debug("api-response", "method", "StopVM", "node", node, "status", response.Status, "response", string(body))
 
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("StopVM-status-error: %s %s", response.Status, body)
@@ -89,10 +89,10 @@ func (client *Client) StopVM(node *Node, vmid int) error {
 	return nil
 }
 
-func (client *Client) StartVm(node *Node, vmid int) error {
+func (client *Client) StartVm(node string, vmid int) error {
 	request, err := http.NewRequest(
 		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node.Node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/start",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/start",
 		nil,
 	)
 	if err != nil {
@@ -117,7 +117,7 @@ func (client *Client) StartVm(node *Node, vmid int) error {
 		return fmt.Errorf("StartVM-close-response: %w", err)
 	}
 
-	slog.Debug("api-response", "method", "StartVM", "node", node.Node, "status", response.Status, "response", string(body))
+	slog.Debug("api-response", "method", "StartVM", "node", node, "status", response.Status, "response", string(body))
 
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("StartVM-status-error: %s %s", response.Status, body)

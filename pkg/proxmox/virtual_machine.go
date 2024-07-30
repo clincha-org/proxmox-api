@@ -12,10 +12,10 @@ import (
 
 const VirtualMachinePath = "/qemu"
 
-func (client *Client) GetVM(node *Node, vmID int) (VirtualMachineConfig, error) {
+func (client *Client) GetVM(node string, vmID int) (VirtualMachineConfig, error) {
 	request, err := http.NewRequest(
 		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node.Node+VirtualMachinePath+"/"+strconv.Itoa(vmID)+"/config",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmID)+"/config",
 		nil,
 	)
 	if err != nil {
@@ -40,11 +40,11 @@ func (client *Client) GetVM(node *Node, vmID int) (VirtualMachineConfig, error) 
 		return VirtualMachineConfig{}, fmt.Errorf("GetVM-close-response: %w", err)
 	}
 
+	slog.Debug("api-response", "method", "GetVM", "node", node, "status", response.Status, "response", string(body))
+
 	if response.StatusCode != http.StatusOK {
 		return VirtualMachineConfig{}, fmt.Errorf("GetVM-status-error: %s %s", response.Status, body)
 	}
-
-	slog.Debug("api-response", "method", "GetVM", "node", node.Node, "response", string(body))
 
 	vmModel := VirtualMachineConfigResponse{}
 	err = json.Unmarshal(body, &vmModel)
@@ -55,10 +55,10 @@ func (client *Client) GetVM(node *Node, vmID int) (VirtualMachineConfig, error) 
 	return vmModel.Data, nil
 }
 
-func (client *Client) GetVMs(node *Node) ([]VirtualMachine, error) {
+func (client *Client) GetVMs(node string) ([]VirtualMachine, error) {
 	request, err := http.NewRequest(
 		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node.Node+VirtualMachinePath,
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath,
 		nil,
 	)
 	if err != nil {
@@ -83,11 +83,11 @@ func (client *Client) GetVMs(node *Node) ([]VirtualMachine, error) {
 		return []VirtualMachine{}, fmt.Errorf("GetVMs-close-response: %w", err)
 	}
 
+	slog.Debug("api-response", "method", "GetVMs", "node", node, "status", response.Status, "response", string(body))
+
 	if response.StatusCode != http.StatusOK {
 		return []VirtualMachine{}, fmt.Errorf("GetVMs-status-error: %s %s", response.Status, body)
 	}
-
-	slog.Debug("api-response", "method", "GetVMs", "node", node.Node, "response", string(body))
 
 	vmModel := VirtualMachinesResponse{}
 	err = json.Unmarshal(body, &vmModel)
@@ -98,7 +98,7 @@ func (client *Client) GetVMs(node *Node) ([]VirtualMachine, error) {
 	return vmModel.Data, nil
 }
 
-func (client *Client) CreateVM(node *Node, vmRequest *VirtualMachineRequest, start bool) (VirtualMachineConfig, error) {
+func (client *Client) CreateVM(node string, vmRequest *VirtualMachineRequest, start bool) (VirtualMachineConfig, error) {
 	requestBody, err := json.Marshal(vmRequest)
 	if err != nil {
 		return VirtualMachineConfig{}, fmt.Errorf("CreateVM-marshal-request: %w", err)
@@ -106,7 +106,7 @@ func (client *Client) CreateVM(node *Node, vmRequest *VirtualMachineRequest, sta
 
 	request, err := http.NewRequest(
 		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node.Node+VirtualMachinePath,
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath,
 		bytes.NewBuffer(requestBody),
 	)
 	if err != nil {
@@ -132,7 +132,7 @@ func (client *Client) CreateVM(node *Node, vmRequest *VirtualMachineRequest, sta
 		return VirtualMachineConfig{}, fmt.Errorf("CreateVM-close-response: %w", err)
 	}
 
-	slog.Debug("api-response", "method", "CreateVM", "node", node.Node, "status", response.Status, "response", string(body))
+	slog.Debug("api-response", "method", "CreateVM", "node", node, "status", response.Status, "response", string(body))
 
 	if response.StatusCode != http.StatusOK {
 		return VirtualMachineConfig{}, fmt.Errorf("CreateVM-status-error: %s %s", response.Status, body)
@@ -148,7 +148,7 @@ func (client *Client) CreateVM(node *Node, vmRequest *VirtualMachineRequest, sta
 	return client.GetVM(node, vmRequest.VMID)
 }
 
-func (client *Client) DeleteVM(node *Node, vmid int) error {
+func (client *Client) DeleteVM(node string, vmid int) error {
 
 	// Check if the VM is still running
 	vmStatus, err := client.GetVMStatus(node, vmid)
@@ -175,7 +175,7 @@ func (client *Client) DeleteVM(node *Node, vmid int) error {
 	// Once the VM is stopped, delete it
 	request, err := http.NewRequest(
 		"DELETE",
-		client.Host+ApiPath+NodesPath+"/"+node.Node+VirtualMachinePath+"/"+strconv.Itoa(vmid),
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmid),
 		nil,
 	)
 	if err != nil {
@@ -200,7 +200,7 @@ func (client *Client) DeleteVM(node *Node, vmid int) error {
 		return fmt.Errorf("DeleteVM-close-response: %w", err)
 	}
 
-	slog.Debug("api-response", "method", "DeleteVM", "node", node.Node, "status", response.Status, "response", string(body))
+	slog.Debug("api-response", "method", "DeleteVM", "node", node, "status", response.Status, "response", string(body))
 
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("DeleteVM-status-error: %s %s", response.Status, body)
