@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 const VirtualMachinePath = "/qemu"
@@ -143,6 +144,28 @@ func (client *Client) CreateVM(node string, vmRequest *VirtualMachineRequest, st
 		if err != nil {
 			return VirtualMachineConfig{}, fmt.Errorf("CreateVM-start-vm: %w", err)
 		}
+	}
+
+	// Make sure the VM has finished configuring before returning
+	// Get the task ID from the response
+	job := JobResponse{}
+	err = json.Unmarshal(body, &job)
+	if err != nil {
+		return VirtualMachineConfig{}, fmt.Errorf("CreateVM-unmarshal-response: %w", err)
+	}
+	// Get the task status
+	task, err := client.GetTask(node, job.ID)
+	if err != nil {
+		return VirtualMachineConfig{}, fmt.Errorf("CreateVM-get-task: %w", err)
+	}
+	// Poll the task status until the task is completed
+	for ok := true; ok; ok = task.Status != "stopped" {
+		task, err = client.GetTask(node, job.ID)
+		if err != nil {
+			return VirtualMachineConfig{}, fmt.Errorf("CreateVM-get-job-loop: %w", err)
+		}
+		// Sleep for 1 second before polling again
+		time.Sleep(1 * time.Second)
 	}
 
 	return client.GetVM(node, vmRequest.ID)
