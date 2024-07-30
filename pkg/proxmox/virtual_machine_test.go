@@ -18,14 +18,7 @@ func TestGetVMs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nodes, err := client.GetNodes()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	node := &nodes[0]
-
-	vm, err := client.GetVMs(node)
+	vm, err := client.GetVMs("pve")
 
 	if err != nil {
 		t.Fatal(err)
@@ -40,14 +33,7 @@ func TestGetVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nodes, err := client.GetNodes()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	node := &nodes[0]
-
-	vm, err := client.GetVM(node, 100)
+	vm, err := client.GetVM("pve", 100)
 
 	if err != nil {
 		t.Fatal(err)
@@ -63,13 +49,6 @@ func TestCreateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nodes, err := client.GetNodes()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	node := &nodes[0]
-
 	request := VirtualMachineRequest{
 		VMID:         102,
 		Cdrom:        "local:iso/ubuntu-22.04.4-live-server-amd64.iso",
@@ -78,7 +57,7 @@ func TestCreateVM(t *testing.T) {
 		SCSIHardware: "virtio-scsi-pci",
 	}
 
-	vm, err := client.CreateVM(node, &request, false)
+	vm, err := client.CreateVM("pve", &request, false)
 
 	if err != nil {
 		t.Fatal(err)
@@ -94,13 +73,6 @@ func TestCreateVMWithStart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nodes, err := client.GetNodes()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	node := &nodes[0]
-
 	request := VirtualMachineRequest{
 		VMID:         102,
 		Cdrom:        "local:iso/ubuntu-22.04.4-live-server-amd64.iso",
@@ -109,7 +81,7 @@ func TestCreateVMWithStart(t *testing.T) {
 		SCSIHardware: "virtio-scsi-pci",
 	}
 
-	vm, err := client.CreateVM(node, &request, true)
+	vm, err := client.CreateVM("pve", &request, true)
 
 	if err != nil {
 		t.Fatal(err)
@@ -125,14 +97,7 @@ func TestDeleteVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nodes, err := client.GetNodes()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	node := &nodes[0]
-
-	err = client.DeleteVM(node, 102)
+	err = client.DeleteVM("pve", 102)
 	if err != nil {
 		t.Fatal(err)
 	}
