@@ -1,7 +1,7 @@
 package proxmox
 
 type VirtualMachineRequest struct {
-	ID           int    `json:"vmid"`
+	ID           int64  `json:"vmid"`
 	Cdrom        string `json:"cdrom"`
 	SCSI1        string `json:"scsi1"`
 	Net1         string `json:"net1"`
@@ -16,7 +16,7 @@ type VirtualMachine struct {
 	Status    string  `json:"status"`
 	Cpu       float32 `json:"cpu"`
 	Diskwrite int     `json:"diskwrite"`
-	Vmid      int     `json:"vmid"`
+	ID        int64   `json:"vmid"`
 	Uptime    int     `json:"uptime"`
 	Netout    int     `json:"netout"`
 	Name      string  `json:"name"`
@@ -71,7 +71,7 @@ type VirtualMachineStatus struct {
 	Name           string  `json:"name"`
 	Qmpstatus      string  `json:"qmpstatus"`
 	Pid            int     `json:"pid"`
-	Vmid           int     `json:"vmid"`
+	ID             int64   `json:"vmid"`
 	Netout         int     `json:"netout"`
 	Uptime         int     `json:"uptime"`
 }

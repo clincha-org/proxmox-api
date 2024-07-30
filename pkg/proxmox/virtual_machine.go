@@ -15,7 +15,7 @@ const VirtualMachinePath = "/qemu"
 func (client *Client) GetVM(node string, id int64) (VirtualMachineConfig, error) {
 	request, err := http.NewRequest(
 		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id)+"/config",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10)+"/config",
 		nil,
 	)
 	if err != nil {
@@ -175,7 +175,7 @@ func (client *Client) DeleteVM(node string, id int64) error {
 	// Once the VM is stopped, delete it
 	request, err := http.NewRequest(
 		"DELETE",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id),
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10),
 		nil,
 	)
 	if err != nil {

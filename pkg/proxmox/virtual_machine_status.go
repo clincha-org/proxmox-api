@@ -12,7 +12,7 @@ import (
 func (client *Client) GetVMStatus(node string, id int64) (VirtualMachineStatus, error) {
 	request, err := http.NewRequest(
 		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id)+"/status/current",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10)+"/status/current",
 		nil,
 	)
 	if err != nil {
@@ -55,7 +55,7 @@ func (client *Client) GetVMStatus(node string, id int64) (VirtualMachineStatus, 
 func (client *Client) StopVM(node string, id int64) error {
 	request, err := http.NewRequest(
 		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id)+"/status/stop",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10)+"/status/stop",
 		nil,
 	)
 	if err != nil {
@@ -92,7 +92,7 @@ func (client *Client) StopVM(node string, id int64) error {
 func (client *Client) StartVm(node string, id int64) error {
 	request, err := http.NewRequest(
 		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id)+"/status/start",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10)+"/status/start",
 		nil,
 	)
 	if err != nil {
