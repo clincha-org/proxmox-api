@@ -15,18 +15,18 @@ type VirtualMachinesResponse struct {
 type VirtualMachine struct {
 	Status    string  `json:"status"`
 	Cpu       float32 `json:"cpu"`
-	Diskwrite int     `json:"diskwrite"`
+	Diskwrite int64   `json:"diskwrite"`
 	ID        int64   `json:"vmid"`
-	Uptime    int     `json:"uptime"`
-	Netout    int     `json:"netout"`
+	Uptime    int64   `json:"uptime"`
+	Netout    int64   `json:"netout"`
 	Name      string  `json:"name"`
 	Maxmem    int64   `json:"maxmem"`
-	Mem       int     `json:"mem"`
-	Diskread  int     `json:"diskread"`
-	Disk      int     `json:"disk"`
-	Netin     int     `json:"netin"`
+	Mem       int64   `json:"mem"`
+	Diskread  int64   `json:"diskread"`
+	Disk      int64   `json:"disk"`
+	Netin     int64   `json:"netin"`
 	Maxdisk   int64   `json:"maxdisk"`
-	Cpus      int     `json:"cpus"`
+	Cpus      int64   `json:"cpus"`
 }
 
 type VirtualMachineConfigResponse struct {
@@ -35,11 +35,11 @@ type VirtualMachineConfigResponse struct {
 type VirtualMachineConfig struct {
 	Meta    string `json:"meta"`
 	Boot    string `json:"boot"`
-	Sockets int    `json:"sockets"`
+	Sockets int64  `json:"sockets"`
 	Cpu     string `json:"cpu"`
 	Ide2    string `json:"ide2"`
-	Cores   int    `json:"cores"`
-	Numa    int    `json:"numa"`
+	Cores   int64  `json:"cores"`
+	Numa    int64  `json:"numa"`
 	Smbios1 string `json:"smbios1"`
 	Vmgenid string `json:"vmgenid"`
 	Net0    string `json:"net0"`
@@ -55,23 +55,23 @@ type VirtualMachineStatusResponse struct {
 }
 
 type VirtualMachineStatus struct {
-	Diskread       int     `json:"diskread"`
-	Maxmem         int     `json:"maxmem"`
-	Mem            int     `json:"mem"`
-	Disk           int     `json:"disk"`
-	Netin          int     `json:"netin"`
+	Diskread       int64   `json:"diskread"`
+	Maxmem         int64   `json:"maxmem"`
+	Mem            int64   `json:"mem"`
+	Disk           int64   `json:"disk"`
+	Netin          int64   `json:"netin"`
 	Cpus           float32 `json:"cpus"`
 	Maxdisk        int64   `json:"maxdisk"`
-	Balloon        int     `json:"balloon"`
+	Balloon        int64   `json:"balloon"`
 	RunningMachine string  `json:"running-machine"`
 	RunningQemu    string  `json:"running-qemu"`
 	Status         string  `json:"status"`
-	Diskwrite      int     `json:"diskwrite"`
+	Diskwrite      int64   `json:"diskwrite"`
 	Cpu            float32 `json:"cpu"`
 	Name           string  `json:"name"`
 	Qmpstatus      string  `json:"qmpstatus"`
-	Pid            int     `json:"pid"`
+	Pid            int64   `json:"pid"`
 	ID             int64   `json:"vmid"`
-	Netout         int     `json:"netout"`
-	Uptime         int     `json:"uptime"`
+	Netout         int64   `json:"netout"`
+	Uptime         int64   `json:"uptime"`
 }
