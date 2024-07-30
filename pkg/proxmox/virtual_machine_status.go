@@ -9,10 +9,10 @@ import (
 	"strconv"
 )
 
-func (client *Client) GetVMStatus(node string, vmid int) (VirtualMachineStatus, error) {
+func (client *Client) GetVMStatus(node string, id int64) (VirtualMachineStatus, error) {
 	request, err := http.NewRequest(
 		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/current",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id)+"/status/current",
 		nil,
 	)
 	if err != nil {
@@ -52,10 +52,10 @@ func (client *Client) GetVMStatus(node string, vmid int) (VirtualMachineStatus, 
 	return vmStatus.Data, nil
 }
 
-func (client *Client) StopVM(node string, vmid int) error {
+func (client *Client) StopVM(node string, id int64) error {
 	request, err := http.NewRequest(
 		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/stop",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id)+"/status/stop",
 		nil,
 	)
 	if err != nil {
@@ -89,10 +89,10 @@ func (client *Client) StopVM(node string, vmid int) error {
 	return nil
 }
 
-func (client *Client) StartVm(node string, vmid int) error {
+func (client *Client) StartVm(node string, id int64) error {
 	request, err := http.NewRequest(
 		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmid)+"/status/start",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id)+"/status/start",
 		nil,
 	)
 	if err != nil {
