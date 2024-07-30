@@ -12,10 +12,10 @@ import (
 
 const VirtualMachinePath = "/qemu"
 
-func (client *Client) GetVM(node string, vmID int) (VirtualMachineConfig, error) {
+func (client *Client) GetVM(node string, id int64) (VirtualMachineConfig, error) {
 	request, err := http.NewRequest(
 		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmID)+"/config",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id)+"/config",
 		nil,
 	)
 	if err != nil {
@@ -139,33 +139,33 @@ func (client *Client) CreateVM(node string, vmRequest *VirtualMachineRequest, st
 	}
 
 	if start {
-		err = client.StartVm(node, vmRequest.VMID)
+		err = client.StartVm(node, vmRequest.ID)
 		if err != nil {
 			return VirtualMachineConfig{}, fmt.Errorf("CreateVM-start-vm: %w", err)
 		}
 	}
 
-	return client.GetVM(node, vmRequest.VMID)
+	return client.GetVM(node, vmRequest.ID)
 }
 
-func (client *Client) DeleteVM(node string, vmid int) error {
+func (client *Client) DeleteVM(node string, id int64) error {
 
 	// Check if the VM is still running
-	vmStatus, err := client.GetVMStatus(node, vmid)
+	vmStatus, err := client.GetVMStatus(node, id)
 	if err != nil {
 		return fmt.Errorf("DeleteVM-get-vm-status: %w", err)
 	}
 
 	if vmStatus.Status != "stopped" {
 		// Stop the VM
-		err = client.StopVM(node, vmid)
+		err = client.StopVM(node, id)
 		if err != nil {
 			return fmt.Errorf("DeleteVM-stop-vm: %w", err)
 		}
 
 		// Poll the VM status until it is stopped
 		for ok := true; ok; ok = vmStatus.Status != "stopped" {
-			vmStatus, err = client.GetVMStatus(node, vmid)
+			vmStatus, err = client.GetVMStatus(node, id)
 			if err != nil {
 				return fmt.Errorf("DeleteVM-get-vm-status-loop: %w", err)
 			}
@@ -175,7 +175,7 @@ func (client *Client) DeleteVM(node string, vmid int) error {
 	// Once the VM is stopped, delete it
 	request, err := http.NewRequest(
 		"DELETE",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(vmid),
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.Itoa(id),
 		nil,
 	)
 	if err != nil {

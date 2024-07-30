@@ -1,7 +1,7 @@
 package proxmox
 
 type VirtualMachineRequest struct {
-	VMID         int    `json:"vmid"`
+	ID           int    `json:"vmid"`
 	Cdrom        string `json:"cdrom"`
 	SCSI1        string `json:"scsi1"`
 	Net1         string `json:"net1"`
