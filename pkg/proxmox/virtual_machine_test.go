@@ -51,8 +51,8 @@ func TestCreateVM(t *testing.T) {
 		SCSI1:        "local-lvm:8",
 		Net1:         "model=virtio,bridge=vmbr0,firewall=1",
 		SCSIHardware: "virtio-scsi-pci",
-		Cores:        4,
-		Memory:       8192,
+		Cores:        1,
+		Memory:       2048,
 	}
 
 	_, err = client.CreateVM("pve", &request, false)
