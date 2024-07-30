@@ -52,6 +52,8 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachineConfig, error)
 		return VirtualMachineConfig{}, fmt.Errorf("GetVM-unmarshal-response: %w", err)
 	}
 
+	fmt.Printf("%+v", vmModel)
+
 	return vmModel.Data, nil
 }
 

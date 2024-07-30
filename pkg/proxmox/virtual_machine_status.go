@@ -52,43 +52,6 @@ func (client *Client) GetVMStatus(node string, id int64) (VirtualMachineStatus, 
 	return vmStatus.Data, nil
 }
 
-func (client *Client) StopVM(node string, id int64) error {
-	request, err := http.NewRequest(
-		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10)+"/status/stop",
-		nil,
-	)
-	if err != nil {
-		return fmt.Errorf("StopVM-build-request: %w", err)
-	}
-
-	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
-	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
-
-	response, err := client.HTTPClient.Do(request)
-	if err != nil {
-		return fmt.Errorf("StopVM-do-request: %w", err)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return fmt.Errorf("StopVM-read-response: %w", err)
-	}
-
-	err = response.Body.Close()
-	if err != nil {
-		return fmt.Errorf("StopVM-close-response: %w", err)
-	}
-
-	slog.Debug("api-response", "method", "StopVM", "node", node, "status", response.Status, "response", string(body))
-
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("StopVM-status-error: %s %s", response.Status, body)
-	}
-
-	return nil
-}
-
 func (client *Client) StartVm(node string, id int64) error {
 	request, err := http.NewRequest(
 		"POST",
@@ -121,6 +84,43 @@ func (client *Client) StartVm(node string, id int64) error {
 
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("StartVM-status-error: %s %s", response.Status, body)
+	}
+
+	return nil
+}
+
+func (client *Client) StopVM(node string, id int64) error {
+	request, err := http.NewRequest(
+		"POST",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10)+"/status/stop",
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("StopVM-build-request: %w", err)
+	}
+
+	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
+	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
+
+	response, err := client.HTTPClient.Do(request)
+	if err != nil {
+		return fmt.Errorf("StopVM-do-request: %w", err)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("StopVM-read-response: %w", err)
+	}
+
+	err = response.Body.Close()
+	if err != nil {
+		return fmt.Errorf("StopVM-close-response: %w", err)
+	}
+
+	slog.Debug("api-response", "method", "StopVM", "node", node, "status", response.Status, "response", string(body))
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("StopVM-status-error: %s %s", response.Status, body)
 	}
 
 	return nil
