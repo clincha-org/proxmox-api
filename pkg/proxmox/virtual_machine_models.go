@@ -73,5 +73,5 @@ type VirtualMachineConfig struct {
 	Scsi0   string `json:"scsi0"`
 	Digest  string `json:"digest"`
 	Scsihw  string `json:"scsihw"`
-	Memory  string `json:"memory"`
+	Memory  int64  `json:"memory"`
 }
