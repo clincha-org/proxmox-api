@@ -21,8 +21,8 @@ jobs:
       - name: "Start Vagrant box"
         working-directory: vagrant
         run: |
-          vagrant up
+          sudo vagrant up
       - name: "Tear down Vagrant box"
         working-directory: vagrant
         run: |
-          vagrant destroy -f
+          sudo vagrant destroy -f
