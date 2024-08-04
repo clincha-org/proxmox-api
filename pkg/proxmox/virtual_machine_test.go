@@ -95,20 +95,13 @@ func TestCreateVMWithStart(t *testing.T) {
 	}
 
 	_, err = client.CreateVM("pve", &request, true)
+	t.Cleanup(func() {
+		err := client.DeleteVM("pve", 102)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
 
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestDeleteVM(t *testing.T) {
-	DebugLogs()
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = client.DeleteVM("pve", 102)
 	if err != nil {
 		t.Fatal(err)
 	}
