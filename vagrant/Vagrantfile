@@ -1,0 +1,3 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "clincha/proxmox-ve-8"
+end
