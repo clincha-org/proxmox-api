@@ -171,6 +171,49 @@ func (client *Client) CreateVM(node string, vmRequest *VirtualMachineRequest, st
 	return client.GetVM(node, vmRequest.ID)
 }
 
+func (client *Client) UpdateVM(node string, vmRequest *VirtualMachineRequest) (VirtualMachineConfig, error) {
+	requestBody, err := json.Marshal(vmRequest)
+	if err != nil {
+		return VirtualMachineConfig{}, fmt.Errorf("UpdateVM-marshal-request: %w", err)
+	}
+
+	request, err := http.NewRequest(
+		"PUT",
+		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(vmRequest.ID, 10)+"/config",
+		bytes.NewBuffer(requestBody),
+	)
+	if err != nil {
+		return VirtualMachineConfig{}, fmt.Errorf("UpdateVM-build-request: %w", err)
+	}
+
+	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
+	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.HTTPClient.Do(request)
+	if err != nil {
+		return VirtualMachineConfig{}, fmt.Errorf("UpdateVM-do-request: %w", err)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return VirtualMachineConfig{}, fmt.Errorf("UpdateVM-read-response: %w", err)
+	}
+
+	err = response.Body.Close()
+	if err != nil {
+		return VirtualMachineConfig{}, fmt.Errorf("UpdateVM-close-response: %w", err)
+	}
+
+	slog.Debug("api-response", "method", "UpdateVM", "node", node, "status", response.Status, "response", string(body))
+
+	if response.StatusCode != http.StatusOK {
+		return VirtualMachineConfig{}, fmt.Errorf("UpdateVM-status-error: %s %s", response.Status, body)
+	}
+
+	return client.GetVM(node, vmRequest.ID)
+}
+
 func (client *Client) DeleteVM(node string, id int64) error {
 
 	// Check if the VM is still running
