@@ -6,8 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
@@ -24,7 +26,11 @@ type Client struct {
 	Ticket     *Ticket
 }
 
-func NewClient(Host string, Username string, Password string) (*Client, error) {
+func NewClient(Host string, Username string, Password string, LogLevel slog.Level) (*Client, error) {
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: LogLevel}))
+	slog.SetDefault(logger)
+
 	client := Client{
 		HTTPClient: &http.Client{
 			Timeout: 10 * time.Second,

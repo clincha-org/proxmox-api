@@ -1,11 +1,12 @@
 package proxmox
 
 import (
+	"log/slog"
 	"testing"
 )
 
 func TestGetNodes(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Error(err)
 	}

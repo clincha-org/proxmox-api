@@ -1,6 +1,7 @@
 package proxmox
 
 import (
+	"log/slog"
 	"testing"
 )
 
@@ -8,7 +9,7 @@ const TestUsername = "root@pam"
 const TestPassword = "vagrant"
 
 func TestLogin(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Error(err)
 	}
@@ -28,7 +29,7 @@ func TestLogin(t *testing.T) {
 }
 
 func TestIncorrectUsername(t *testing.T) {
-	_, err := NewClient(DefaultHostURL, TestUsername, "wrong")
+	_, err := NewClient(DefaultHostURL, TestUsername, "wrong", slog.LevelDebug)
 	if err == nil {
 		t.Error("Expected authentication failure")
 	}

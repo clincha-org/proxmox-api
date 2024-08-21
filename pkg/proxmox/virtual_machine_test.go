@@ -2,17 +2,11 @@ package proxmox
 
 import (
 	"log/slog"
-	"os"
 	"testing"
 )
 
-func DebugLogs() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	slog.SetDefault(logger)
-}
-
 func TestGetVMs(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,8 +19,7 @@ func TestGetVMs(t *testing.T) {
 }
 
 func TestGetVM(t *testing.T) {
-	DebugLogs()
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,8 +70,7 @@ func TestGetVM(t *testing.T) {
 }
 
 func TestCreateVM(t *testing.T) {
-	DebugLogs()
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,8 +115,7 @@ func TestCreateVM(t *testing.T) {
 }
 
 func TestCreateVMWithStart(t *testing.T) {
-	DebugLogs()
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,8 +151,7 @@ func TestCreateVMWithStart(t *testing.T) {
 }
 
 func TestUpdateVM(t *testing.T) {
-	DebugLogs()
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
