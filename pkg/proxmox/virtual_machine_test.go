@@ -45,14 +45,21 @@ func TestCreateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	cdrom := "local:iso/ubuntu-24.04-live-server-amd64.iso"
+	scsi1 := "local-lvm:8"
+	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	scsiHardware := "virtio-scsi-pci"
+	cores := int64(1)
+	memory := int64(2048)
+
 	request := VirtualMachineRequest{
 		ID:           102,
-		Cdrom:        "local:iso/ubuntu-22.04.4-live-server-amd64.iso",
-		SCSI1:        "local-lvm:8",
-		Net1:         "model=virtio,bridge=vmbr0,firewall=1",
-		SCSIHardware: "virtio-scsi-pci",
-		Cores:        1,
-		Memory:       2048,
+		Cdrom:        &cdrom,
+		SCSI1:        &scsi1,
+		Net1:         &net1,
+		SCSIHardware: &scsiHardware,
+		Cores:        &cores,
+		Memory:       &memory,
 	}
 
 	vm, err := client.CreateVM("pve", &request, false)
@@ -84,14 +91,21 @@ func TestCreateVMWithStart(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	cdrom := "local:iso/ubuntu-24.04-live-server-amd64.iso"
+	scsi1 := "local-lvm:8"
+	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	scsiHardware := "virtio-scsi-pci"
+	cores := int64(1)
+	memory := int64(2048)
+
 	request := VirtualMachineRequest{
 		ID:           102,
-		Cdrom:        "local:iso/ubuntu-22.04.4-live-server-amd64.iso",
-		SCSI1:        "local-lvm:8",
-		Net1:         "model=virtio,bridge=vmbr0,firewall=1",
-		SCSIHardware: "virtio-scsi-pci",
-		Cores:        1,
-		Memory:       2048,
+		Cdrom:        &cdrom,
+		SCSI1:        &scsi1,
+		Net1:         &net1,
+		SCSIHardware: &scsiHardware,
+		Cores:        &cores,
+		Memory:       &memory,
 	}
 
 	_, err = client.CreateVM("pve", &request, true)
@@ -111,5 +125,62 @@ func TestDeleteVM(t *testing.T) {
 	err = client.DeleteVM("pve", 102)
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestUpdateVM(t *testing.T) {
+	DebugLogs()
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cdrom := "local:iso/ubuntu-24.04-live-server-amd64.iso"
+	scsi1 := "local-lvm:8"
+	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	scsiHardware := "virtio-scsi-pci"
+	cores := int64(1)
+	memory := int64(2048)
+
+	request := VirtualMachineRequest{
+		ID:           102,
+		Cdrom:        &cdrom,
+		SCSI1:        &scsi1,
+		Net1:         &net1,
+		SCSIHardware: &scsiHardware,
+		Cores:        &cores,
+		Memory:       &memory,
+	}
+
+	_, err = client.CreateVM("pve", &request, true)
+	t.Cleanup(func() {
+		err := client.DeleteVM("pve", 102)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cores = int64(1)
+	memory = int64(1024)
+
+	request.Cores = &cores
+	request.Memory = &memory
+	request.Net1 = nil
+	request.SCSI1 = nil
+
+	vm, err := client.UpdateVM("pve", &request)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if vm.Cores != 1 {
+		t.Errorf("Expected 1 cores, got %d", vm.Cores)
+	}
+
+	if vm.Memory != 1024 {
+		t.Errorf("Expected 1024 memory, got %d", vm.Memory)
 	}
 }

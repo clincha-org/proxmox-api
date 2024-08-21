@@ -1,13 +1,13 @@
 package proxmox
 
 type VirtualMachineRequest struct {
-	ID           int64  `json:"vmid"`
-	Cdrom        string `json:"cdrom"`
-	SCSI1        string `json:"scsi1"`
-	Net1         string `json:"net1"`
-	SCSIHardware string `json:"scsihw"`
-	Cores        int64  `json:"cores"`
-	Memory       int64  `json:"memory"`
+	ID           int64   `json:"vmid"`
+	Cdrom        *string `json:"cdrom,omitempty"`
+	SCSI1        *string `json:"scsi1,omitempty"`
+	Net1         *string `json:"net1,omitempty"`
+	SCSIHardware *string `json:"scsihw,omitempty"`
+	Cores        *int64  `json:"cores,omitempty"`
+	Memory       *int64  `json:"memory,omitempty"`
 }
 
 type VirtualMachinesResponse struct {
