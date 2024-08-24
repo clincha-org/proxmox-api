@@ -1,6 +1,7 @@
 package proxmox
 
 import (
+	"github.com/clincha-org/proxmox-api/internal/ide"
 	"log/slog"
 	"testing"
 )
@@ -24,21 +25,26 @@ func TestGetVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cdrom := "local:iso/ubuntu-24.04-live-server-amd64.iso"
+	isoPath := "iso/ubuntu-24.04-live-server-amd64.iso"
+	cdrom := ide.InternalDataStorage{
+		ID:      2,
+		Storage: "local",
+		Path:    &isoPath,
+	}
 	scsi1 := "local-lvm:8"
 	net1 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	cores := int64(1)
 	memory := int64(2048)
 
-	request := VirtualMachineRequest{
+	request := VirtualMachine{
 		ID:           102,
-		Cdrom:        &cdrom,
+		IDEDevices:   &[]ide.InternalDataStorage{cdrom},
 		SCSI1:        &scsi1,
 		Net1:         &net1,
 		SCSIHardware: &scsiHardware,
-		Cores:        &cores,
-		Memory:       &memory,
+		Cores:        cores,
+		Memory:       memory,
 	}
 
 	_, err = client.CreateVM("pve", &request, false)
@@ -75,26 +81,31 @@ func TestCreateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cdrom := "local:iso/ubuntu-24.04-live-server-amd64.iso"
+	isoPath := "iso/ubuntu-24.04-live-server-amd64.iso"
+	cdrom := ide.InternalDataStorage{
+		ID:      2,
+		Storage: "local",
+		Path:    &isoPath,
+	}
 	scsi1 := "local-lvm:8"
 	net1 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	cores := int64(1)
 	memory := int64(2048)
 
-	request := VirtualMachineRequest{
-		ID:           103,
-		Cdrom:        &cdrom,
+	request := VirtualMachine{
+		ID:           102,
+		IDEDevices:   &[]ide.InternalDataStorage{cdrom},
 		SCSI1:        &scsi1,
 		Net1:         &net1,
 		SCSIHardware: &scsiHardware,
-		Cores:        &cores,
-		Memory:       &memory,
+		Cores:        cores,
+		Memory:       memory,
 	}
 
 	vm, err := client.CreateVM("pve", &request, false)
 	t.Cleanup(func() {
-		err := client.DeleteVM("pve", 103)
+		err := client.DeleteVM("pve", 102)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -120,26 +131,31 @@ func TestCreateVMWithStart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cdrom := "local:iso/ubuntu-24.04-live-server-amd64.iso"
+	isoPath := "iso/ubuntu-24.04-live-server-amd64.iso"
+	cdrom := ide.InternalDataStorage{
+		ID:      2,
+		Storage: "local",
+		Path:    &isoPath,
+	}
 	scsi1 := "local-lvm:8"
 	net1 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	cores := int64(1)
 	memory := int64(2048)
 
-	request := VirtualMachineRequest{
-		ID:           104,
-		Cdrom:        &cdrom,
+	request := VirtualMachine{
+		ID:           102,
+		IDEDevices:   &[]ide.InternalDataStorage{cdrom},
 		SCSI1:        &scsi1,
 		Net1:         &net1,
 		SCSIHardware: &scsiHardware,
-		Cores:        &cores,
-		Memory:       &memory,
+		Cores:        cores,
+		Memory:       memory,
 	}
 
-	_, err = client.CreateVM("pve", &request, true)
+	vm, err := client.CreateVM("pve", &request, true)
 	t.Cleanup(func() {
-		err := client.DeleteVM("pve", 104)
+		err := client.DeleteVM("pve", 102)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -148,6 +164,11 @@ func TestCreateVMWithStart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if vm.Cores != 1 {
+		t.Errorf("Expected 1 core, got %d", vm.Cores)
+	}
+
 }
 
 func TestUpdateVM(t *testing.T) {
@@ -156,26 +177,34 @@ func TestUpdateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cdrom := "local:iso/ubuntu-24.04-live-server-amd64.iso"
+	isoPath := "iso/ubuntu-24.04-live-server-amd64.iso"
+	cdrom := ide.InternalDataStorage{
+		ID:      2,
+		Storage: "local",
+		Path:    &isoPath,
+	}
+	newDiskSize := "4"
+	ide1 := ide.InternalDataStorage{
+		ID:      1,
+		Storage: "local-lvm",
+		Size:    &newDiskSize,
+	}
 	scsi1 := "local-lvm:8"
 	net1 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
-	cores := int64(1)
-	memory := int64(2048)
-
-	request := VirtualMachineRequest{
-		ID:           104,
-		Cdrom:        &cdrom,
+	request := VirtualMachine{
+		ID:           102,
+		IDEDevices:   &[]ide.InternalDataStorage{cdrom, ide1},
 		SCSI1:        &scsi1,
 		Net1:         &net1,
 		SCSIHardware: &scsiHardware,
-		Cores:        &cores,
-		Memory:       &memory,
+		Cores:        1,
+		Memory:       2048,
 	}
 
 	_, err = client.CreateVM("pve", &request, true)
 	t.Cleanup(func() {
-		err := client.DeleteVM("pve", 104)
+		err := client.DeleteVM("pve", 102)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -184,11 +213,7 @@ func TestUpdateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cores = int64(1)
-	memory = int64(1024)
-
-	request.Cores = &cores
-	request.Memory = &memory
+	request.Memory = 1024
 	request.Net1 = nil
 	request.SCSI1 = nil
 
@@ -203,5 +228,9 @@ func TestUpdateVM(t *testing.T) {
 
 	if vm.Memory != 1024 {
 		t.Errorf("Expected 1024 memory, got %d", vm.Memory)
+	}
+
+	if len(*vm.IDEDevices) != 2 {
+		t.Errorf("Expected 2 ide devices, got %d", len(*vm.IDEDevices))
 	}
 }
