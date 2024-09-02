@@ -1,19 +1,34 @@
 package proxmox
 
+import "github.com/clincha-org/proxmox-api/internal/ide"
+
+type VirtualMachine struct {
+	ID           int64                      `json:"vmid"`
+	IDEDevices   *[]ide.InternalDataStorage `json:"-"`
+	SCSI1        *string                    `json:"net1"`
+	Net1         *string                    `json:"net1"`
+	SCSIHardware *string                    `json:"scsihw"`
+	Cores        int64                      `json:"cores"`
+	Memory       int64                      `json:"memory"`
+}
+
 type VirtualMachineRequest struct {
-	ID           int64  `json:"vmid"`
-	Cdrom        string `json:"cdrom"`
-	SCSI1        string `json:"scsi1"`
-	Net1         string `json:"net1"`
-	SCSIHardware string `json:"scsihw"`
-	Cores        int64  `json:"cores"`
-	Memory       int64  `json:"memory"`
+	ID           int64   `json:"vmid"`
+	IDE0         *string `json:"ide0,omitempty"`
+	IDE1         *string `json:"ide1,omitempty"`
+	IDE2         *string `json:"ide2,omitempty"`
+	IDE3         *string `json:"ide3,omitempty"`
+	SCSI1        *string `json:"scsi1,omitempty"`
+	Net1         *string `json:"net1,omitempty"`
+	SCSIHardware *string `json:"scsihw,omitempty"`
+	Cores        int64   `json:"cores,omitempty"`
+	Memory       int64   `json:"memory,omitempty"`
 }
 
 type VirtualMachinesResponse struct {
-	Data []VirtualMachine `json:"data"`
+	Data []VirtualMachineListItem `json:"data"`
 }
-type VirtualMachine struct {
+type VirtualMachineListItem struct {
 	Status    string  `json:"status"`
 	Cpu       float32 `json:"cpu"`
 	Diskwrite int64   `json:"diskwrite"`
@@ -59,19 +74,22 @@ type VirtualMachineConfigResponse struct {
 	Data VirtualMachineConfig `json:"data"`
 }
 type VirtualMachineConfig struct {
-	Meta    string `json:"meta"`
-	Boot    string `json:"boot"`
-	Sockets int64  `json:"sockets"`
-	Cpu     string `json:"cpu"`
-	Ide2    string `json:"ide2"`
-	Cores   int64  `json:"cores"`
-	Numa    int64  `json:"numa"`
-	Smbios1 string `json:"smbios1"`
-	Vmgenid string `json:"vmgenid"`
-	Net0    string `json:"net0"`
-	Ostype  string `json:"ostype"`
-	Scsi0   string `json:"scsi0"`
-	Digest  string `json:"digest"`
-	Scsihw  string `json:"scsihw"`
-	Memory  int64  `json:"memory,string"`
+	Meta    string  `json:"meta"`
+	Boot    string  `json:"boot"`
+	Sockets int64   `json:"sockets"`
+	Cpu     string  `json:"cpu"`
+	IDE0    *string `json:"ide0,omitempty"`
+	IDE1    *string `json:"ide1,omitempty"`
+	IDE2    *string `json:"ide2,omitempty"`
+	IDE3    *string `json:"ide3,omitempty"`
+	Cores   int64   `json:"cores"`
+	Numa    int64   `json:"numa"`
+	Smbios1 string  `json:"smbios1"`
+	Vmgenid string  `json:"vmgenid"`
+	Net1    string  `json:"net1"`
+	Ostype  string  `json:"ostype"`
+	Scsi0   string  `json:"scsi0"`
+	Digest  string  `json:"digest"`
+	Scsihw  string  `json:"scsihw"`
+	Memory  int64   `json:"memory,string"`
 }

@@ -1,12 +1,13 @@
 package proxmox
 
 import (
+	"log/slog"
 	"strings"
 	"testing"
 )
 
 func TestGetDefaultInterface(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +30,7 @@ func TestGetDefaultInterface(t *testing.T) {
 }
 
 func TestNetworkNetmaskUpdate(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +82,7 @@ func TestNetworkNetmaskUpdate(t *testing.T) {
 }
 
 func TestNetworkCIDRUpdate(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +141,7 @@ func TestNetworkCIDRUpdate(t *testing.T) {
 }
 
 func TestNetworkAutostart(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,7 +190,7 @@ func TestNetworkAutostart(t *testing.T) {
 }
 
 func TestNetworkBridgePorts(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -237,7 +238,7 @@ func TestNetworkBridgePorts(t *testing.T) {
 }
 
 func TestNetworkOmittedFields(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -310,7 +311,7 @@ func TestNetworkOmittedFields(t *testing.T) {
 }
 
 func TestSubnetMaskReturnedInSameFormat(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -345,7 +346,7 @@ func TestSubnetMaskReturnedInSameFormat(t *testing.T) {
 }
 
 func TestNetworkWithOnlyName(t *testing.T) {
-	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword)
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
 		t.Fatal(err)
 	}
