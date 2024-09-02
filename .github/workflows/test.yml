@@ -12,6 +12,7 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+
       - name: "Install VirtualBox"
         run: |
           wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor -o /usr/share/keyrings/oracle-virtualbox-2016.gpg
@@ -29,29 +30,15 @@ jobs:
         with:
           go-version: 1.22.5
 
-      - name: "Install gotestsum"
+      - name: "Install Go Test Summariser"
         run: |
           go install gotest.tools/gotestsum@v1.12.0
-
-      - name: "Restore Vagrant box"
-        id: restore-vagrant-box
-        uses: 'actions/cache/restore@v4.0.2'
-        with:
-          path: vagrant
-          key: ${{ runner.os }}-${{ hashFiles('vagrant/Vagrantfile') }}
 
       - name: "Provision Vagrant box"
         if: steps.restore-vagrant-box.outputs.cache-hit != 'true'
         working-directory: vagrant
         run: |
           sudo vagrant provision
-
-      - name: "Save Vagrant box"
-        id: cache-vagrant-box
-        uses: 'actions/cache/save@v4.0.2'
-        with:
-          path: vagrant
-          key: ${{ runner.os }}-${{ hashFiles('vagrant/Vagrantfile') }}
 
       - name: "Start Vagrant box"
         working-directory: vagrant
@@ -61,7 +48,7 @@ jobs:
       - name: "Load the Ubuntu ISO into the Vagrant box"
         working-directory: vagrant
         run: |
-          sudo vagrant ssh -c "sudo wget --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/22.04/ubuntu-22.04.4-live-server-amd64.iso"
+          sudo vagrant ssh -c "sudo wget --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/22.04/ubuntu-22.04.4-live-server-amd64.iso -q"
 
       - name: "Run tests"
         working-directory: pkg/proxmox
