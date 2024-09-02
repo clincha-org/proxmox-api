@@ -58,8 +58,3 @@ jobs:
         working-directory: internal/ide
         run: |
           gotestsum --format testname
-
-      - name: "Tear down Vagrant box"
-        working-directory: vagrant
-        run: |
-          sudo vagrant destroy -f
