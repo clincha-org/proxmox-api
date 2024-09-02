@@ -42,7 +42,7 @@ jobs:
       - name: "Start Vagrant box"
         working-directory: vagrant
         run: |
-          sudo vagrant up --quiet
+          sudo vagrant up --no-tty
 
       - name: "Load the Ubuntu ISO into the Vagrant box"
         working-directory: vagrant
