@@ -57,7 +57,7 @@ jobs:
       - name: "Load the Ubuntu ISO into the Vagrant box"
         working-directory: vagrant
         run: |
-          sudo vagrant ssh -c "sudo wget -O /var/lib/vz/template/iso http://releases.ubuntu.com/20.04/ubuntu-20.04.3-live-server-amd64.iso"
+          sudo vagrant ssh -c "sudo wget --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/24.04.1/ubuntu-24.04.1-live-server-amd64.iso"
 
       - name: "Run tests"
         working-directory: pkg/proxmox
