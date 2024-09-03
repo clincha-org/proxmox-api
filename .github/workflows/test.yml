@@ -34,11 +34,6 @@ jobs:
         run: |
           go install gotest.tools/gotestsum@v1.12.0
 
-      - name: "Provision Vagrant box"
-        working-directory: vagrant
-        run: |
-          sudo vagrant provision
-
       - name: "Start Vagrant box"
         working-directory: vagrant
         run: |
@@ -47,7 +42,7 @@ jobs:
       - name: "Load the Ubuntu ISO into the Vagrant box"
         working-directory: vagrant
         run: |
-          sudo vagrant ssh -c "sudo wget --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/24.04/ubuntu-24.04-live-server-amd64.iso -q"
+          sudo vagrant ssh -c "sudo wget --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/24.04/ubuntu-24.04.1-live-server-amd64.iso -q"
 
       - name: "Run Proxmox tests"
         working-directory: pkg/proxmox
