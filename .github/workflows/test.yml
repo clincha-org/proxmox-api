@@ -1,20 +1,55 @@
 on:
   push:
     branches:
-      - '*'
+      - '**'
+env:
+  GO_VERSION: 1.22.5
+  VIRTUALBOX_VERSION: 7.0
+  VAGRANT_VERSION: 2.2.19
 jobs:
   test:
     runs-on: ubuntu-22.04
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+
       - name: "Install VirtualBox"
         run: |
           wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor -o /usr/share/keyrings/oracle-virtualbox-2016.gpg
           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
-          sudo apt-get update && sudo apt-get install virtualbox-7.0
+          sudo apt-get -qq update && sudo apt-get -qq install virtualbox-7.0
+
       - name: "Install Vagrant"
         run: |
           wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
           echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-          sudo apt-get update && sudo apt-get install vagrant
+          sudo apt-get update -qq && sudo apt-get -qq install vagrant
+
+      - name: "Install Go"
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.5
+
+      - name: "Install Go Test Summariser"
+        run: |
+          go install gotest.tools/gotestsum@v1.12.0
+
+      - name: "Start Vagrant box"
+        working-directory: vagrant
+        run: |
+          sudo vagrant up --no-tty
+
+      - name: "Load the Ubuntu ISO into the Vagrant box"
+        working-directory: vagrant
+        run: |
+          sudo vagrant ssh -c "sudo wget --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/24.04/ubuntu-24.04.1-live-server-amd64.iso -q"
+
+      - name: "Run Proxmox tests"
+        working-directory: pkg/proxmox
+        run: |
+          gotestsum --format testname
+
+      - name: "Run IDE tests"
+        working-directory: internal/ide
+        run: |
+          gotestsum --format testname

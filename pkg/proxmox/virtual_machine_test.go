@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const UbuntuTestIso = "ubuntu-24.04.1-live-server-amd64.iso"
+
 func TestGetVMs(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {
@@ -25,7 +27,7 @@ func TestGetVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	isoPath := "iso/ubuntu-24.04-live-server-amd64.iso"
+	isoPath := "iso/" + UbuntuTestIso
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
 		Storage: "local",
@@ -81,7 +83,7 @@ func TestCreateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	isoPath := "iso/ubuntu-24.04-live-server-amd64.iso"
+	isoPath := "iso/" + UbuntuTestIso
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
 		Storage: "local",
@@ -131,7 +133,7 @@ func TestCreateVMWithStart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	isoPath := "iso/ubuntu-24.04-live-server-amd64.iso"
+	isoPath := "iso/" + UbuntuTestIso
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
 		Storage: "local",
@@ -177,7 +179,7 @@ func TestUpdateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	isoPath := "iso/ubuntu-24.04-live-server-amd64.iso"
+	isoPath := "iso/" + UbuntuTestIso
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
 		Storage: "local",
