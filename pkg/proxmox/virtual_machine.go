@@ -52,8 +52,10 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 	vmModel := VirtualMachineConfigResponse{}
 
 	// In Proxmox VE 7, the API returns numbers without quotes, which is invalid JSON
-	re := regexp.MustCompile(`(":\s*)([\d\.]+)(\s*[,}])`)
+	re := regexp.MustCompile(`(":\s*)([\d.]+)(\s*[,}])`)
 	body = re.ReplaceAll(body, []byte(`$1"$2"$3`))
+
+	slog.Debug("api-response-quoted", "method", "GetVM", "node", node, "response", string(body))
 
 	err = json.Unmarshal(body, &vmModel)
 	if err != nil {

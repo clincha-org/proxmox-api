@@ -76,14 +76,14 @@ type VirtualMachineConfigResponse struct {
 type VirtualMachineConfig struct {
 	Meta    string  `json:"meta"`
 	Boot    string  `json:"boot"`
-	Sockets int64   `json:"sockets"`
+	Sockets int64   `json:"sockets,string"`
 	Cpu     string  `json:"cpu"`
 	IDE0    *string `json:"ide0,omitempty"`
 	IDE1    *string `json:"ide1,omitempty"`
 	IDE2    *string `json:"ide2,omitempty"`
 	IDE3    *string `json:"ide3,omitempty"`
-	Cores   int64   `json:"cores"`
-	Numa    int64   `json:"numa"`
+	Cores   int64   `json:"cores,string"`
+	Numa    int64   `json:"numa,string"`
 	Smbios1 string  `json:"smbios1"`
 	Vmgenid string  `json:"vmgenid"`
 	Net1    string  `json:"net1"`
