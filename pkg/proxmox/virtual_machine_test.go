@@ -1,7 +1,7 @@
 package proxmox
 
 import (
-	"github.com/clincha-org/proxmox-api/internal/ide"
+	"github.com/clincha-org/proxmox-api/pkg/ide"
 	"log/slog"
 	"testing"
 )
