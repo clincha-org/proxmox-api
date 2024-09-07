@@ -1,6 +1,7 @@
 package ide
 
 import (
+	"fmt"
 	"log/slog"
 	"strings"
 )
@@ -33,11 +34,15 @@ func Unmarshal(id int64, data string, storage *InternalDataStorage) error {
 func Marshal(storage *InternalDataStorage) (string, error) {
 
 	if storage == nil {
-		return "", nil
+		return "", fmt.Errorf("cannot marshal into nil InternalDataStorage object")
 	}
 
 	if storage.ID < 0 || storage.ID > 3 {
-		return "", nil
+		return "", fmt.Errorf("invalid ID for IDE device: %v", storage.ID)
+	}
+
+	if storage.Storage == "" {
+		return "", fmt.Errorf("storage is required for IDE device: %v", storage.ID)
 	}
 
 	var data string
