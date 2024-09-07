@@ -55,12 +55,7 @@ jobs:
         run: |
           sudo vagrant ssh -c "sudo wget -q --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/${{ env.UBUNTU_VERSION }}/ubuntu-${{ env.UBUNTU_VERSION }}-live-server-amd64.iso"
 
-      - name: "Run Proxmox tests"
-        working-directory: pkg/proxmox
-        run: |
-          gotestsum --format testname
-
-      - name: "Run IDE tests"
-        working-directory: internal/ide
+      - name: "Run tests"
+        working-directory: pkg
         run: |
           gotestsum --format testname
