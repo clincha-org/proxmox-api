@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	ide2 "github.com/clincha-org/proxmox-api/pkg/ide"
+	"github.com/clincha-org/proxmox-api/pkg/ide"
 	"io"
 	"log/slog"
 	"net/http"
@@ -70,14 +70,14 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 		Memory:       vmModel.Data.Memory,
 	}
 
-	var IdeDevices []ide2.InternalDataStorage
+	var IdeDevices []ide.InternalDataStorage
 	for index, IDEDeviceString := range []*string{vmModel.Data.IDE0, vmModel.Data.IDE1, vmModel.Data.IDE2, vmModel.Data.IDE3} {
 		if IDEDeviceString == nil {
 			continue
 		}
 
-		device := ide2.InternalDataStorage{}
-		err := ide2.Unmarshal(int64(index), *IDEDeviceString, &device)
+		device := ide.InternalDataStorage{}
+		err := ide.Unmarshal(int64(index), *IDEDeviceString, &device)
 		if err != nil {
 			return VirtualMachine{}, err
 		}
@@ -153,7 +153,7 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-ide-device: %d", ideDevice.ID)
 		}
 
-		marshal, err := ide2.Marshal(&ideDevice)
+		marshal, err := ide.Marshal(&ideDevice)
 		if err != nil {
 			return VirtualMachine{}, err
 		}
