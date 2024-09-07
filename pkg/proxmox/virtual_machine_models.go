@@ -1,6 +1,8 @@
 package proxmox
 
-import "github.com/clincha-org/proxmox-api/internal/ide"
+import (
+	"github.com/clincha-org/proxmox-api/pkg/ide"
+)
 
 type VirtualMachine struct {
 	ID           int64                      `json:"vmid"`
