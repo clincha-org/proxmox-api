@@ -313,7 +313,7 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 	slog.Debug("api-request", "method", "UpdateVM", "node", node, "request", string(requestBody))
 
 	request, err := http.NewRequest(
-		"PUT",
+		"POST",
 		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(vmRequest.ID, 10)+"/config",
 		bytes.NewBuffer(requestBody),
 	)
@@ -344,6 +344,28 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 
 	if response.StatusCode != http.StatusOK {
 		return VirtualMachine{}, fmt.Errorf("UpdateVM-status-error: %s %s", response.Status, body)
+	}
+
+	// Make sure the VM has finished configuring before returning
+	// Get the task ID from the response
+	job := JobResponse{}
+	err = json.Unmarshal(body, &job)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CreateVM-unmarshal-response: %w", err)
+	}
+	// Get the task status
+	task, err := client.GetTask(node, job.ID)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CreateVM-get-task: %w", err)
+	}
+	// Poll the task status until the task is completed
+	for ok := true; ok; ok = task.Status != "stopped" {
+		task, err = client.GetTask(node, job.ID)
+		if err != nil {
+			return VirtualMachine{}, fmt.Errorf("CreateVM-get-job-loop: %w", err)
+		}
+		// Sleep for 1 second before polling again
+		time.Sleep(1 * time.Second)
 	}
 
 	return client.GetVM(node, vmRequest.ID)
