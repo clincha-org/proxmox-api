@@ -295,3 +295,38 @@ func TestIDERemoval(t *testing.T) {
 		t.Errorf("Expected 1 ide devices, got %d", len(*vm.IDEDevices))
 	}
 }
+
+func TestCreateVMWithNoIDEDevices(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	scsi1 := "local-lvm:8"
+	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	scsiHardware := "virtio-scsi-pci"
+	vm := VirtualMachine{
+		ID:           102,
+		SCSI1:        &scsi1,
+		Net1:         &net1,
+		SCSIHardware: &scsiHardware,
+		Cores:        1,
+		Memory:       2048,
+	}
+
+	vm, err = client.CreateVM("pve", &vm, true)
+	t.Cleanup(func() {
+		err := client.DeleteVM("pve", 102)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if vm.IDEDevices != nil {
+		t.Errorf("Expected nil ide devices, got %v", vm.IDEDevices)
+	}
+}

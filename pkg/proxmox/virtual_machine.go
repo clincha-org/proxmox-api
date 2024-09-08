@@ -71,21 +71,22 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 		Memory:       vmModel.Data.Memory,
 	}
 
-	var IdeDevices []ide.InternalDataStorage
-	for index, IDEDeviceString := range []*string{vmModel.Data.IDE0, vmModel.Data.IDE1, vmModel.Data.IDE2, vmModel.Data.IDE3} {
-		if IDEDeviceString == nil {
-			continue
-		}
+	if vmModel.Data.IDE0 != nil && vmModel.Data.IDE1 != nil && vmModel.Data.IDE2 != nil && vmModel.Data.IDE3 != nil {
+		var IdeDevices []ide.InternalDataStorage
+		for index, IDEDeviceString := range []*string{vmModel.Data.IDE0, vmModel.Data.IDE1, vmModel.Data.IDE2, vmModel.Data.IDE3} {
+			if IDEDeviceString == nil {
+				continue
+			}
 
-		device := ide.InternalDataStorage{}
-		err := ide.Unmarshal(int64(index), *IDEDeviceString, &device)
-		if err != nil {
-			return VirtualMachine{}, err
+			device := ide.InternalDataStorage{}
+			err := ide.Unmarshal(int64(index), *IDEDeviceString, &device)
+			if err != nil {
+				return VirtualMachine{}, err
+			}
+			IdeDevices = append(IdeDevices, device)
 		}
-		IdeDevices = append(IdeDevices, device)
+		vm.IDEDevices = &IdeDevices
 	}
-	vm.IDEDevices = &IdeDevices
-
 	return vm, nil
 }
 
@@ -142,32 +143,34 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 		Memory:       vm.Memory,
 	}
 
-	if len(*vm.IDEDevices) > 4 {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-number-of-ide-devices: %d. Proxmox only allows 4 IDE devices", len(*vm.IDEDevices))
-	}
-
-	for _, ideDevice := range *vm.IDEDevices {
-
-		slog.Debug("ide-device", "method", "CreateVM", "device", ideDevice)
-
-		if ideDevice.ID > 3 || ideDevice.ID < 0 {
-			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-ide-device: %d", ideDevice.ID)
+	if vm.IDEDevices != nil {
+		if len(*vm.IDEDevices) > 4 {
+			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-number-of-ide-devices: %d. Proxmox only allows 4 IDE devices", len(*vm.IDEDevices))
 		}
 
-		marshal, err := ide.Marshal(&ideDevice)
-		if err != nil {
-			return VirtualMachine{}, err
-		}
+		for _, ideDevice := range *vm.IDEDevices {
 
-		switch ideDevice.ID {
-		case 0:
-			vmRequest.IDE0 = &marshal
-		case 1:
-			vmRequest.IDE1 = &marshal
-		case 2:
-			vmRequest.IDE2 = &marshal
-		case 3:
-			vmRequest.IDE3 = &marshal
+			slog.Debug("ide-device", "method", "CreateVM", "device", ideDevice)
+
+			if ideDevice.ID > 3 || ideDevice.ID < 0 {
+				return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-ide-device: %d", ideDevice.ID)
+			}
+
+			marshal, err := ide.Marshal(&ideDevice)
+			if err != nil {
+				return VirtualMachine{}, err
+			}
+
+			switch ideDevice.ID {
+			case 0:
+				vmRequest.IDE0 = &marshal
+			case 1:
+				vmRequest.IDE1 = &marshal
+			case 2:
+				vmRequest.IDE2 = &marshal
+			case 3:
+				vmRequest.IDE3 = &marshal
+			}
 		}
 	}
 
@@ -257,51 +260,56 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 		return VirtualMachine{}, fmt.Errorf("UpdateVM-get-current-state: %w", err)
 	}
 
-	var deleteDevices []string
-	for _, ideDevice := range *currentState.IDEDevices {
-		found := false
-		for _, newIdeDevice := range *vm.IDEDevices {
-			if ideDevice.ID == newIdeDevice.ID {
-				found = true
-				break
+	if currentState.IDEDevices != nil {
+		// Delete any IDE devices that are not in the new state
+		var deleteDevices []string
+		for _, ideDevice := range *currentState.IDEDevices {
+			found := false
+			for _, newIdeDevice := range *vm.IDEDevices {
+				if ideDevice.ID == newIdeDevice.ID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				deleteDevices = append(deleteDevices, "ide"+strconv.FormatInt(ideDevice.ID, 10))
 			}
 		}
-		if !found {
-			deleteDevices = append(deleteDevices, "ide"+strconv.FormatInt(ideDevice.ID, 10))
+
+		if len(deleteDevices) > 0 {
+			ideDeviceStrings := strings.Join(deleteDevices, ",")
+			vmRequest.Delete = &ideDeviceStrings
+		}
+
+		if len(*vm.IDEDevices) > 4 {
+			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-number-of-ide-devices: %d. Proxmox only allows 4 IDE devices", len(*vm.IDEDevices))
 		}
 	}
 
-	if len(deleteDevices) > 0 {
-		ideDeviceStrings := strings.Join(deleteDevices, ",")
-		vmRequest.Delete = &ideDeviceStrings
-	}
+	if vm.IDEDevices != nil {
+		for _, ideDevice := range *vm.IDEDevices {
 
-	if len(*vm.IDEDevices) > 4 {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-number-of-ide-devices: %d. Proxmox only allows 4 IDE devices", len(*vm.IDEDevices))
-	}
+			slog.Debug("ide-device", "method", "UpdateVM", "device", ideDevice)
 
-	for _, ideDevice := range *vm.IDEDevices {
+			if ideDevice.ID > 3 || ideDevice.ID < 0 {
+				return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-ide-device: %d", ideDevice.ID)
+			}
 
-		slog.Debug("ide-device", "method", "UpdateVM", "device", ideDevice)
+			marshal, err := ide.Marshal(&ideDevice)
+			if err != nil {
+				return VirtualMachine{}, err
+			}
 
-		if ideDevice.ID > 3 || ideDevice.ID < 0 {
-			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-ide-device: %d", ideDevice.ID)
-		}
-
-		marshal, err := ide.Marshal(&ideDevice)
-		if err != nil {
-			return VirtualMachine{}, err
-		}
-
-		switch ideDevice.ID {
-		case 0:
-			vmRequest.IDE0 = &marshal
-		case 1:
-			vmRequest.IDE1 = &marshal
-		case 2:
-			vmRequest.IDE2 = &marshal
-		case 3:
-			vmRequest.IDE3 = &marshal
+			switch ideDevice.ID {
+			case 0:
+				vmRequest.IDE0 = &marshal
+			case 1:
+				vmRequest.IDE1 = &marshal
+			case 2:
+				vmRequest.IDE2 = &marshal
+			case 3:
+				vmRequest.IDE3 = &marshal
+			}
 		}
 	}
 
