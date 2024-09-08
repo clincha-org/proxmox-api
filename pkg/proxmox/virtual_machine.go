@@ -260,7 +260,7 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 		return VirtualMachine{}, fmt.Errorf("UpdateVM-get-current-state: %w", err)
 	}
 
-	if currentState.IDEDevices != nil {
+	if currentState.IDEDevices != nil && vm.IDEDevices != nil {
 		// Delete any IDE devices that are not in the new state
 		var deleteDevices []string
 		for _, ideDevice := range *currentState.IDEDevices {
