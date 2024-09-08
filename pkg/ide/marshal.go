@@ -12,7 +12,7 @@ func Unmarshal(id int64, data string, storage *InternalDataStorage) error {
 	}
 	commaSeparated := strings.Split(data, ",")
 
-	slog.Debug("ide-unmarshal", "data", data)
+	slog.Debug("ide-unmarshal", "method", "Unmarshal", "data", data)
 
 	storage.ID = id
 

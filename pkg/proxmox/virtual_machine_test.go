@@ -194,7 +194,7 @@ func TestUpdateVM(t *testing.T) {
 	scsi1 := "local-lvm:8"
 	net1 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
-	request := VirtualMachine{
+	vm := VirtualMachine{
 		ID:           102,
 		IDEDevices:   &[]ide.InternalDataStorage{cdrom, ide1},
 		SCSI1:        &scsi1,
@@ -204,7 +204,7 @@ func TestUpdateVM(t *testing.T) {
 		Memory:       2048,
 	}
 
-	_, err = client.CreateVM("pve", &request, true)
+	vm, err = client.CreateVM("pve", &vm, true)
 	t.Cleanup(func() {
 		err := client.DeleteVM("pve", 102)
 		if err != nil {
@@ -215,11 +215,11 @@ func TestUpdateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request.Memory = 1024
-	request.Net1 = nil
-	request.SCSI1 = nil
+	vm.Memory = 1024
+	vm.Net1 = nil
+	vm.SCSI1 = nil
 
-	vm, err := client.UpdateVM("pve", &request)
+	vm, err = client.UpdateVM("pve", &vm)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -234,5 +234,64 @@ func TestUpdateVM(t *testing.T) {
 
 	if len(*vm.IDEDevices) != 2 {
 		t.Errorf("Expected 2 ide devices, got %d", len(*vm.IDEDevices))
+	}
+}
+
+func TestIDERemoval(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	isoPath := "iso/" + UbuntuTestIso
+	size := "4"
+	ide1 := ide.InternalDataStorage{
+		ID:      1,
+		Storage: "local-lvm",
+		Size:    &size,
+	}
+	cdrom := ide.InternalDataStorage{
+		ID:      2,
+		Storage: "local",
+		Path:    &isoPath,
+	}
+	scsi1 := "local-lvm:8"
+	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	scsiHardware := "virtio-scsi-pci"
+	vm := VirtualMachine{
+		ID:           102,
+		IDEDevices:   &[]ide.InternalDataStorage{cdrom, ide1},
+		SCSI1:        &scsi1,
+		Net1:         &net1,
+		SCSIHardware: &scsiHardware,
+		Cores:        1,
+		Memory:       2048,
+	}
+
+	vm, err = client.CreateVM("pve", &vm, true)
+	t.Cleanup(func() {
+		err := client.DeleteVM("pve", 102)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(*vm.IDEDevices) != 2 {
+		t.Errorf("Expected 2 ide devices, got %d", len(*vm.IDEDevices))
+	}
+
+	vm.IDEDevices = &[]ide.InternalDataStorage{cdrom}
+
+	vm, err = client.UpdateVM("pve", &vm)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(*vm.IDEDevices) != 1 {
+		t.Errorf("Expected 1 ide devices, got %d", len(*vm.IDEDevices))
 	}
 }

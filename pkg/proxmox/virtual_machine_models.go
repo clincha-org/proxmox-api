@@ -25,6 +25,7 @@ type VirtualMachineRequest struct {
 	SCSIHardware *string `json:"scsihw,omitempty"`
 	Cores        int64   `json:"cores,omitempty"`
 	Memory       int64   `json:"memory,omitempty"`
+	Delete       *string `json:"delete,omitempty"`
 }
 
 type VirtualMachinesResponse struct {

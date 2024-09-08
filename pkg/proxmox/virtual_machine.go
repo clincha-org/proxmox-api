@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -147,7 +148,7 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 
 	for _, ideDevice := range *vm.IDEDevices {
 
-		slog.Debug("ide-device", "device", ideDevice)
+		slog.Debug("ide-device", "method", "CreateVM", "device", ideDevice)
 
 		if ideDevice.ID > 3 || ideDevice.ID < 0 {
 			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-ide-device: %d", ideDevice.ID)
@@ -241,11 +242,75 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 	return client.GetVM(node, vm.ID)
 }
 
-func (client *Client) UpdateVM(node string, vmRequest *VirtualMachine) (VirtualMachine, error) {
+func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine, error) {
+	vmRequest := VirtualMachineRequest{
+		ID:           vm.ID,
+		SCSI1:        vm.SCSI1,
+		Net1:         vm.Net1,
+		SCSIHardware: vm.SCSIHardware,
+		Cores:        vm.Cores,
+		Memory:       vm.Memory,
+	}
+
+	currentState, err := client.GetVM(node, vm.ID)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("UpdateVM-get-current-state: %w", err)
+	}
+
+	var deleteDevices []string
+	for _, ideDevice := range *currentState.IDEDevices {
+		found := false
+		for _, newIdeDevice := range *vm.IDEDevices {
+			if ideDevice.ID == newIdeDevice.ID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			deleteDevices = append(deleteDevices, "ide"+strconv.FormatInt(ideDevice.ID, 10))
+		}
+	}
+
+	if len(deleteDevices) > 0 {
+		ideDeviceStrings := strings.Join(deleteDevices, ",")
+		vmRequest.Delete = &ideDeviceStrings
+	}
+
+	if len(*vm.IDEDevices) > 4 {
+		return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-number-of-ide-devices: %d. Proxmox only allows 4 IDE devices", len(*vm.IDEDevices))
+	}
+
+	for _, ideDevice := range *vm.IDEDevices {
+
+		slog.Debug("ide-device", "method", "UpdateVM", "device", ideDevice)
+
+		if ideDevice.ID > 3 || ideDevice.ID < 0 {
+			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-ide-device: %d", ideDevice.ID)
+		}
+
+		marshal, err := ide.Marshal(&ideDevice)
+		if err != nil {
+			return VirtualMachine{}, err
+		}
+
+		switch ideDevice.ID {
+		case 0:
+			vmRequest.IDE0 = &marshal
+		case 1:
+			vmRequest.IDE1 = &marshal
+		case 2:
+			vmRequest.IDE2 = &marshal
+		case 3:
+			vmRequest.IDE3 = &marshal
+		}
+	}
+
 	requestBody, err := json.Marshal(vmRequest)
 	if err != nil {
 		return VirtualMachine{}, fmt.Errorf("UpdateVM-marshal-request: %w", err)
 	}
+
+	slog.Debug("api-request", "method", "UpdateVM", "node", node, "request", string(requestBody))
 
 	request, err := http.NewRequest(
 		"PUT",
