@@ -7,7 +7,7 @@ import (
 type VirtualMachine struct {
 	ID           int64                      `json:"vmid"`
 	IDEDevices   *[]ide.InternalDataStorage `json:"-"`
-	SCSI1        *string                    `json:"net1"`
+	SCSI1        *string                    `json:"scsi1"`
 	Net1         *string                    `json:"net1"`
 	SCSIHardware *string                    `json:"scsihw"`
 	Cores        int64                      `json:"cores"`
