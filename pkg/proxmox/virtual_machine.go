@@ -260,29 +260,36 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 		return VirtualMachine{}, fmt.Errorf("UpdateVM-get-current-state: %w", err)
 	}
 
-	if currentState.IDEDevices != nil && vm.IDEDevices != nil {
-		// Delete any IDE devices that are not in the new state
-		var deleteDevices []string
-		for _, ideDevice := range *currentState.IDEDevices {
-			found := false
-			for _, newIdeDevice := range *vm.IDEDevices {
-				if ideDevice.ID == newIdeDevice.ID {
-					found = true
-					break
-				}
-			}
-			if !found {
+	// If there are no IDE devices in the current state, then there is nothing to delete
+	if currentState.IDEDevices != nil {
+		// If there are no IDE devices in the new state, then we need to delete all IDE devices
+		if vm.IDEDevices == nil {
+			var deleteDevices []string
+			for _, ideDevice := range *currentState.IDEDevices {
 				deleteDevices = append(deleteDevices, "ide"+strconv.FormatInt(ideDevice.ID, 10))
 			}
-		}
-
-		if len(deleteDevices) > 0 {
 			ideDeviceStrings := strings.Join(deleteDevices, ",")
 			vmRequest.Delete = &ideDeviceStrings
-		}
+		} else {
+			// Delete any IDE devices that are not in the new state
+			var deleteDevices []string
+			for _, ideDevice := range *currentState.IDEDevices {
+				found := false
+				for _, newIdeDevice := range *vm.IDEDevices {
+					if ideDevice.ID == newIdeDevice.ID {
+						found = true
+						break
+					}
+				}
+				if !found {
+					deleteDevices = append(deleteDevices, "ide"+strconv.FormatInt(ideDevice.ID, 10))
+				}
+			}
 
-		if len(*vm.IDEDevices) > 4 {
-			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-number-of-ide-devices: %d. Proxmox only allows 4 IDE devices", len(*vm.IDEDevices))
+			if len(deleteDevices) > 0 {
+				ideDeviceStrings := strings.Join(deleteDevices, ",")
+				vmRequest.Delete = &ideDeviceStrings
+			}
 		}
 	}
 
@@ -310,6 +317,10 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 			case 3:
 				vmRequest.IDE3 = &marshal
 			}
+		}
+
+		if len(*vm.IDEDevices) > 4 {
+			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-number-of-ide-devices: %d. Proxmox only allows 4 IDE devices", len(*vm.IDEDevices))
 		}
 	}
 
