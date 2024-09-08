@@ -71,7 +71,7 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 		Memory:       vmModel.Data.Memory,
 	}
 
-	if vmModel.Data.IDE0 != nil && vmModel.Data.IDE1 != nil && vmModel.Data.IDE2 != nil && vmModel.Data.IDE3 != nil {
+	if vmModel.Data.IDE0 != nil || vmModel.Data.IDE1 != nil || vmModel.Data.IDE2 != nil || vmModel.Data.IDE3 != nil {
 		var IdeDevices []ide.InternalDataStorage
 		for index, IDEDeviceString := range []*string{vmModel.Data.IDE0, vmModel.Data.IDE1, vmModel.Data.IDE2, vmModel.Data.IDE3} {
 			if IDEDeviceString == nil {
@@ -144,14 +144,13 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 	}
 
 	if vm.IDEDevices != nil {
+		slog.Debug("ide-devices", "method", "CreateVM", "devices", vm.IDEDevices)
 		if len(*vm.IDEDevices) > 4 {
 			return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-number-of-ide-devices: %d. Proxmox only allows 4 IDE devices", len(*vm.IDEDevices))
 		}
 
 		for _, ideDevice := range *vm.IDEDevices {
-
 			slog.Debug("ide-device", "method", "CreateVM", "device", ideDevice)
-
 			if ideDevice.ID > 3 || ideDevice.ID < 0 {
 				return VirtualMachine{}, fmt.Errorf("CreateVM-invalid-ide-device: %d", ideDevice.ID)
 			}
@@ -174,6 +173,7 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 		}
 	}
 
+	slog.Debug("api-request", "method", "CreateVM", "node", node, "request", vmRequest)
 	requestBody, err := json.Marshal(vmRequest)
 	if err != nil {
 		return VirtualMachine{}, fmt.Errorf("CreateVM-marshal-request: %w", err)

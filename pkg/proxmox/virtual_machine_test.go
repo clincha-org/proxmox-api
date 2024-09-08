@@ -215,6 +215,14 @@ func TestUpdateVM(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if vm.IDEDevices == nil {
+		t.Errorf("Expected ide devices, got %v", vm.IDEDevices)
+	}
+
+	if len(*vm.IDEDevices) != 2 {
+		t.Errorf("Expected 2 ide devices, got %d", len(*vm.IDEDevices))
+	}
+
 	vm.Memory = 1024
 	vm.Net1 = nil
 	vm.SCSI1 = nil
