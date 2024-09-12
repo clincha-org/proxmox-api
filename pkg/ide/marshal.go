@@ -48,7 +48,11 @@ func Marshal(storage *InternalDataStorage) (string, error) {
 	var data string
 	// Handle special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume. See Proxmox API documentation.
 	if storage.Path == nil && storage.Size != nil && *storage.Size != "" {
+		// Remove the trailing "G" from the size
+		*storage.Size = strings.TrimSuffix(*storage.Size, "G")
+
 		slog.Debug("ide-marshal", "method", "Marshal", "new volume", storage.Storage+":"+*storage.Size)
+
 		return storage.Storage + ":" + *storage.Size, nil
 	}
 
