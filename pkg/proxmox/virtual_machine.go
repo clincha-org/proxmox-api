@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const VirtualMachinePath = "/qemu"
@@ -213,33 +212,22 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 		return VirtualMachine{}, fmt.Errorf("CreateVM-status-error: %s %s", response.Status, body)
 	}
 
+	// Make sure the VM has finished configuring
+	job := AsynchronousTaskResponse{}
+	err = json.Unmarshal(body, &job)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CreateVM-unmarshal-response: %w", err)
+	}
+	err = client.AwaitAsynchronousTask(node, job.ID)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CreateVM-await-task: %w", err)
+	}
+
 	if start {
 		err = client.StartVm(node, vm.ID)
 		if err != nil {
 			return VirtualMachine{}, fmt.Errorf("CreateVM-start-vm: %w", err)
 		}
-	}
-
-	// Make sure the VM has finished configuring before returning
-	// Get the task ID from the response
-	job := JobResponse{}
-	err = json.Unmarshal(body, &job)
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-unmarshal-response: %w", err)
-	}
-	// Get the task status
-	task, err := client.GetTask(node, job.ID)
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-get-task: %w", err)
-	}
-	// Poll the task status until the task is completed
-	for ok := true; ok; ok = task.Status != "stopped" {
-		task, err = client.GetTask(node, job.ID)
-		if err != nil {
-			return VirtualMachine{}, fmt.Errorf("CreateVM-get-job-loop: %w", err)
-		}
-		// Sleep for 1 second before polling again
-		time.Sleep(1 * time.Second)
 	}
 
 	return client.GetVM(node, vm.ID)
@@ -365,26 +353,15 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 		return VirtualMachine{}, fmt.Errorf("UpdateVM-status-error: %s %s", response.Status, body)
 	}
 
-	// Make sure the VM has finished configuring before returning
-	// Get the task ID from the response
-	job := JobResponse{}
+	// Make sure the VM has finished configuring
+	job := AsynchronousTaskResponse{}
 	err = json.Unmarshal(body, &job)
 	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-unmarshal-response: %w", err)
+		return VirtualMachine{}, fmt.Errorf("UpdateVM-unmarshal-response: %w", err)
 	}
-	// Get the task status
-	task, err := client.GetTask(node, job.ID)
+	err = client.AwaitAsynchronousTask(node, job.ID)
 	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-get-task: %w", err)
-	}
-	// Poll the task status until the task is completed
-	for ok := true; ok; ok = task.Status != "stopped" {
-		task, err = client.GetTask(node, job.ID)
-		if err != nil {
-			return VirtualMachine{}, fmt.Errorf("CreateVM-get-job-loop: %w", err)
-		}
-		// Sleep for 1 second before polling again
-		time.Sleep(1 * time.Second)
+		return VirtualMachine{}, fmt.Errorf("UpdateVM-await-task: %w", err)
 	}
 
 	return client.GetVM(node, vmRequest.ID)
@@ -448,26 +425,15 @@ func (client *Client) DeleteVM(node string, id int64) error {
 		return fmt.Errorf("DeleteVM-status-error: %s %s", response.Status, body)
 	}
 
-	// Make sure the VM has finished configuring before returning
-	// Get the task ID from the response
-	job := JobResponse{}
+	// Make sure the VM has finished configuring
+	job := AsynchronousTaskResponse{}
 	err = json.Unmarshal(body, &job)
 	if err != nil {
 		return fmt.Errorf("DeleteVM-unmarshal-response: %w", err)
 	}
-	// Get the task status
-	task, err := client.GetTask(node, job.ID)
+	err = client.AwaitAsynchronousTask(node, job.ID)
 	if err != nil {
-		return fmt.Errorf("DeleteVM-get-task: %w", err)
-	}
-	// Poll the task status until the task is completed
-	for ok := true; ok; ok = task.Status != "stopped" {
-		task, err = client.GetTask(node, job.ID)
-		if err != nil {
-			return fmt.Errorf("DeleteVM-get-job-loop: %w", err)
-		}
-		// Sleep for 1 second before polling again
-		time.Sleep(1 * time.Second)
+		return fmt.Errorf("DeleteVM-await-task: %w", err)
 	}
 
 	return nil

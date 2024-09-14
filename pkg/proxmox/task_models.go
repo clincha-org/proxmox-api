@@ -1,5 +1,11 @@
 package proxmox
 
+// AsynchronousTaskResponse Proxmox can send us an ID of a task that is being executed asynchronously. We can use this to query the status of the task.
+type AsynchronousTaskResponse struct {
+	ID string `json:"data"`
+}
+
+// TaskResponse We can use the AsynchronousTaskResponse.ID to query the status of the task.
 type TaskResponse struct {
 	Data Task `json:"data"`
 }
@@ -13,8 +19,4 @@ type Task struct {
 	Type      string `json:"type"`
 	UPID      string `json:"upid"`
 	User      string `json:"user"`
-}
-
-type JobResponse struct {
-	ID string `json:"data"`
 }
