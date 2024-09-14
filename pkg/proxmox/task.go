@@ -58,14 +58,14 @@ func (client *Client) GetTaskStatus(node string, id string) (Task, error) {
 func (client *Client) AwaitAsynchronousTask(node string, taskID string) error {
 	task, err := client.GetTaskStatus(node, taskID)
 	if err != nil {
-		return fmt.Errorf("AwaitAsynchronousTask-get-task-status: %w", err)
+		return fmt.Errorf("AwaitAsynchronousTask-get-task-status: '%s' %w", taskID, err)
 	}
 
 	// Poll the task status until the task is completed
 	for ok := true; ok; ok = task.Status != "stopped" {
-		task, err = client.GetTaskStatus(node, task.ID)
+		task, err = client.GetTaskStatus(node, taskID)
 		if err != nil {
-			return fmt.Errorf("AwaitAsynchronousTask-get-job-loop: %w", err)
+			return fmt.Errorf("AwaitAsynchronousTask-get-job-loop: '%s' %w", taskID, err)
 		}
 		// Sleep for 1 second before polling again
 		time.Sleep(1 * time.Second)
