@@ -11,12 +11,13 @@ type TaskResponse struct {
 }
 
 type Task struct {
-	ID        string `json:"id"`
-	Node      string `json:"node"`
-	PID       int64  `json:"pid"`
-	StartTime int64  `json:"starttime"`
-	Status    string `json:"status"`
-	Type      string `json:"type"`
-	UPID      string `json:"upid"`
-	User      string `json:"user"`
+	VirtualMachineID string  `json:"id"`
+	Node             string  `json:"node"`
+	PID              int64   `json:"pid"`
+	StartTime        int64   `json:"starttime"`
+	Status           string  `json:"status"`
+	Type             string  `json:"type"`
+	UPID             string  `json:"upid"`
+	User             string  `json:"user"`
+	ExitStatus       *string `json:"exitstatus"`
 }

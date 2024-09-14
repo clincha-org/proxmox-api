@@ -86,6 +86,13 @@ func (client *Client) StartVm(node string, id int64) error {
 		return fmt.Errorf("StartVM-status-error: %s %s", response.Status, body)
 	}
 
+	job := AsynchronousTaskResponse{}
+	err = json.Unmarshal(body, &job)
+	if err != nil {
+		return fmt.Errorf("StartVM-unmarshal-response: %w", err)
+	}
+	err = client.AwaitAsynchronousTask(node, job.ID)
+
 	return nil
 }
 
@@ -121,6 +128,16 @@ func (client *Client) StopVM(node string, id int64) error {
 
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("StopVM-status-error: %s %s", response.Status, body)
+	}
+
+	job := AsynchronousTaskResponse{}
+	err = json.Unmarshal(body, &job)
+	if err != nil {
+		return fmt.Errorf("StopVM-unmarshal-response: %w", err)
+	}
+	err = client.AwaitAsynchronousTask(node, job.ID)
+	if err != nil {
+		return fmt.Errorf("StopVM-await-task: %w", err)
 	}
 
 	return nil

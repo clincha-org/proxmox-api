@@ -63,12 +63,20 @@ func (client *Client) AwaitAsynchronousTask(node string, taskID string) error {
 
 	// Poll the task status until the task is completed
 	for ok := true; ok; ok = task.Status != "stopped" {
-		task, err = client.GetTaskStatus(node, taskID)
+		task, err = client.GetTaskStatus(node, task.UPID)
 		if err != nil {
 			return fmt.Errorf("AwaitAsynchronousTask-get-job-loop: '%s' %w", taskID, err)
 		}
 		// Sleep for 1 second before polling again
 		time.Sleep(1 * time.Second)
+	}
+
+	if task.ExitStatus == nil {
+		return fmt.Errorf("AwaitAsynchronousTask-exit-status-nil: '%s'", taskID)
+	}
+
+	if *task.ExitStatus != "OK" {
+		return fmt.Errorf("AwaitAsynchronousTask-exit-status-not-ok: '%s' %s", taskID, *task.ExitStatus)
 	}
 
 	return nil

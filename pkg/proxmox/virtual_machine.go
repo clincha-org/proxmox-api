@@ -381,14 +381,6 @@ func (client *Client) DeleteVM(node string, id int64) error {
 		if err != nil {
 			return fmt.Errorf("DeleteVM-stop-vm: %w", err)
 		}
-
-		// Poll the VM status until it is stopped
-		for ok := true; ok; ok = vmStatus.Status != "stopped" {
-			vmStatus, err = client.GetVMStatus(node, id)
-			if err != nil {
-				return fmt.Errorf("DeleteVM-get-vm-status-loop: %w", err)
-			}
-		}
 	}
 
 	// Once the VM is stopped, delete it
