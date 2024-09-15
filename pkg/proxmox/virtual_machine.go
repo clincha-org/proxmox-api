@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/clincha-org/proxmox-api/pkg/ide"
-	"io"
 	"log/slog"
-	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,40 +14,12 @@ import (
 const VirtualMachinePath = "/qemu"
 
 func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
-	request, err := http.NewRequest(
-		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10)+"/config",
-		nil,
-	)
+	path := client.Host + ApiPath + NodesPath + "/" + node + VirtualMachinePath + "/" + strconv.FormatInt(id, 10) + "/config"
+
+	body, err := client.MakeRESTRequest("GET", path, nil)
 	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("GetVM-build-request: %w", err)
+		return VirtualMachine{}, fmt.Errorf("GetVM-make-request: %w", err)
 	}
-
-	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
-	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
-
-	response, err := client.HTTPClient.Do(request)
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("GetVM-do-request: %w", err)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("GetVM-read-response: %w", err)
-	}
-
-	err = response.Body.Close()
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("GetVM-close-response: %w", err)
-	}
-
-	slog.Debug("api-response", "method", "GetVM", "node", node, "status", response.Status, "response", string(body))
-
-	if response.StatusCode != http.StatusOK {
-		return VirtualMachine{}, fmt.Errorf("GetVM-status-error: %s %s", response.Status, body)
-	}
-
-	vmModel := VirtualMachineConfigResponse{}
 
 	// The API returns numbers with and without quotes, so we quote all numbers to make it easier to unmarshal
 	re := regexp.MustCompile(`(":\s*)([\d.]+)(\s*[,}])`)
@@ -57,6 +27,7 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 
 	slog.Debug("api-response-quoted", "method", "GetVM", "node", node, "response", string(body))
 
+	vmModel := VirtualMachineConfigResponse{}
 	err = json.Unmarshal(body, &vmModel)
 	if err != nil {
 		return VirtualMachine{}, fmt.Errorf("GetVM-unmarshal-response: %w", err)
@@ -90,37 +61,11 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 }
 
 func (client *Client) GetVMs(node string) ([]VirtualMachineListItem, error) {
-	request, err := http.NewRequest(
-		"GET",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath,
-		nil,
-	)
+	path := client.Host + ApiPath + NodesPath + "/" + node + VirtualMachinePath
+
+	body, err := client.MakeRESTRequest("GET", path, nil)
 	if err != nil {
-		return []VirtualMachineListItem{}, fmt.Errorf("GetVMs-build-request: %w", err)
-	}
-
-	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
-	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
-
-	response, err := client.HTTPClient.Do(request)
-	if err != nil {
-		return []VirtualMachineListItem{}, fmt.Errorf("GetVMs-do-request: %w", err)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return []VirtualMachineListItem{}, fmt.Errorf("GetVMs-read-response: %w", err)
-	}
-
-	err = response.Body.Close()
-	if err != nil {
-		return []VirtualMachineListItem{}, fmt.Errorf("GetVMs-close-response: %w", err)
-	}
-
-	slog.Debug("api-response", "method", "GetVMs", "node", node, "status", response.Status, "response", string(body))
-
-	if response.StatusCode != http.StatusOK {
-		return []VirtualMachineListItem{}, fmt.Errorf("GetVMs-status-error: %s %s", response.Status, body)
+		return []VirtualMachineListItem{}, fmt.Errorf("GetVMs-make-request: %w", err)
 	}
 
 	vmModel := VirtualMachinesResponse{}
@@ -178,38 +123,10 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 		return VirtualMachine{}, fmt.Errorf("CreateVM-marshal-request: %w", err)
 	}
 
-	request, err := http.NewRequest(
-		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath,
-		bytes.NewBuffer(requestBody),
-	)
+	path := client.Host + ApiPath + NodesPath + "/" + node + VirtualMachinePath
+	body, err := client.MakeRESTRequest("POST", path, bytes.NewBuffer(requestBody))
 	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-build-request: %w", err)
-	}
-
-	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
-	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
-	request.Header.Set("Content-Type", "application/json")
-
-	response, err := client.HTTPClient.Do(request)
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-do-request: %w", err)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-read-response: %w", err)
-	}
-
-	err = response.Body.Close()
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-close-response: %w", err)
-	}
-
-	slog.Debug("api-response", "method", "CreateVM", "node", node, "status", response.Status, "response", string(body))
-
-	if response.StatusCode != http.StatusOK {
-		return VirtualMachine{}, fmt.Errorf("CreateVM-status-error: %s %s", response.Status, body)
+		return VirtualMachine{}, fmt.Errorf("CreateVM-make-request: %w", err)
 	}
 
 	// Make sure the VM has finished configuring
@@ -319,38 +236,10 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 
 	slog.Debug("api-request", "method", "UpdateVM", "node", node, "request", string(requestBody))
 
-	request, err := http.NewRequest(
-		"POST",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(vmRequest.ID, 10)+"/config",
-		bytes.NewBuffer(requestBody),
-	)
+	path := client.Host + ApiPath + NodesPath + "/" + node + VirtualMachinePath + "/" + strconv.FormatInt(vm.ID, 10) + "/config"
+	body, err := client.MakeRESTRequest("POST", path, bytes.NewBuffer(requestBody))
 	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("UpdateVM-build-request: %w", err)
-	}
-
-	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
-	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
-	request.Header.Set("Content-Type", "application/json")
-
-	response, err := client.HTTPClient.Do(request)
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("UpdateVM-do-request: %w", err)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("UpdateVM-read-response: %w", err)
-	}
-
-	err = response.Body.Close()
-	if err != nil {
-		return VirtualMachine{}, fmt.Errorf("UpdateVM-close-response: %w", err)
-	}
-
-	slog.Debug("api-response", "method", "UpdateVM", "node", node, "status", response.Status, "response", string(body))
-
-	if response.StatusCode != http.StatusOK {
-		return VirtualMachine{}, fmt.Errorf("UpdateVM-status-error: %s %s", response.Status, body)
+		return VirtualMachine{}, fmt.Errorf("UpdateVM-make-request: %w", err)
 	}
 
 	// Make sure the VM has finished configuring
@@ -383,38 +272,10 @@ func (client *Client) DeleteVM(node string, id int64) error {
 		}
 	}
 
-	// Once the VM is stopped, delete it
-	request, err := http.NewRequest(
-		"DELETE",
-		client.Host+ApiPath+NodesPath+"/"+node+VirtualMachinePath+"/"+strconv.FormatInt(id, 10),
-		nil,
-	)
+	path := client.Host + ApiPath + NodesPath + "/" + node + VirtualMachinePath + "/" + strconv.FormatInt(id, 10)
+	body, err := client.MakeRESTRequest("DELETE", path, nil)
 	if err != nil {
-		return fmt.Errorf("DeleteVM-build-request: %w", err)
-	}
-
-	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
-	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
-
-	response, err := client.HTTPClient.Do(request)
-	if err != nil {
-		return fmt.Errorf("DeleteVM-do-request: %w", err)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return fmt.Errorf("DeleteVM-read-response: %w", err)
-	}
-
-	err = response.Body.Close()
-	if err != nil {
-		return fmt.Errorf("DeleteVM-close-response: %w", err)
-	}
-
-	slog.Debug("api-response", "method", "DeleteVM", "node", node, "status", response.Status, "response", string(body))
-
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("DeleteVM-status-error: %s %s", response.Status, body)
+		return fmt.Errorf("DeleteVM-make-request: %w", err)
 	}
 
 	// Make sure the VM has finished configuring

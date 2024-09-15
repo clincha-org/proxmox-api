@@ -6,6 +6,44 @@ import (
 	"testing"
 )
 
+func TestGetNetworks(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node := &nodes[0]
+
+	_, err = client.GetNetworks(node)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestNetworkReload(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetNodes()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node := &nodes[0]
+
+	err = client.ReloadNetwork(node)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestGetDefaultInterface(t *testing.T) {
 	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
 	if err != nil {

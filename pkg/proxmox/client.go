@@ -1,6 +1,7 @@
 package proxmox
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -102,4 +103,51 @@ func (client *Client) Login() (*Ticket, error) {
 	}
 
 	return &ticket, nil
+}
+
+func (client *Client) MakeRESTRequest(method string, path string, body *bytes.Buffer) ([]byte, error) {
+	request := &http.Request{}
+	err := error(nil)
+
+	// We need to check if body is nil before creating the request
+	// because passing a nil body of type bytes.Buffer to http.NewRequest will cause a panic
+	// https://go.dev/doc/faq#nil_error
+	if body == nil {
+		request, err = http.NewRequest(method, path, nil)
+		if err != nil {
+			return nil, fmt.Errorf("MakeRESTRequest-new-request: %w", err)
+		}
+	} else {
+		request, err = http.NewRequest(method, path, body)
+		if err != nil {
+			return nil, fmt.Errorf("MakeRESTRequest-new-request-with-body: %w", err)
+		}
+		request.Header.Set("Content-Type", "application/json")
+	}
+
+	request.AddCookie(&http.Cookie{Name: "PVEAuthCookie", Value: client.Ticket.Data.Ticket})
+	request.Header.Set("CSRFPreventionToken", client.Ticket.Data.CSRFPreventionToken)
+
+	response, err := client.HTTPClient.Do(request)
+	if err != nil {
+		return nil, fmt.Errorf("MakeRESTRequest-do-request: %w", err)
+	}
+
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("MakeRESTRequest-read-response: %w", err)
+	}
+
+	err = response.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("MakeRESTRequest-close-response: %w", err)
+	}
+
+	slog.Debug("api-response", "method", "MakeRESTRequest", "rest_method", method, "path", path, "status", response.Status, "response", string(responseBody))
+
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("GetVM-status-error: %s %s", response.Status, body)
+	}
+
+	return responseBody, nil
 }
