@@ -1,6 +1,8 @@
 #!/bin/bash
 
-INTERFACE=eth0
+ip address
+
+INTERFACE=enp0s8
 
 ## Get the IP address of the host
 HOST_IP=$(ip address show dev $INTERFACE  | grep -oP '(?:\b\.?(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){4}/\d\d' | head -1)
