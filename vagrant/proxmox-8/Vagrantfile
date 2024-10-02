@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", id: "proxmox_web_gui", host: 8006, guest: 8006, host_ip: "0.0.0.0", guest_ip: "10.0.2.15"
   config.vm.network "forwarded_port", id: "ssh", host: 2222, guest: 22, host_ip: "0.0.0.0", guest_ip: "10.0.2.15"
 
-  config.vm.network "public_network", bridge: "enp77s0" #, auto_config: false
+  config.vm.network "public_network", bridge: "eth0" #, auto_config: false
 
   config.ssh.username = 'root'
   config.ssh.password = 'vagrant'
