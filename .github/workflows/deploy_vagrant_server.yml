@@ -1,15 +1,13 @@
-name: "Tests"
+name: "Deploy Vagrant Server"
 on:
-#  push:
-#    branches:
-#      - '**'
+  push:
+    branches:
+      - '**'
   workflow_dispatch:
 env:
-  GO_VERSION: "1.22.5"
-  GO_TEST_SUMMARISER_VERSION: "1.12.0"
-  UBUNTU_VERSION: "24.04.1"
   VIRTUALBOX_VERSION: "7.0"
   VAGRANT_VERSION: "2.4.1-1"
+  UBUNTU_VERSION: "24.04.1"
 jobs:
   tests:
     strategy:
@@ -35,27 +33,13 @@ jobs:
           sudo apt-get update -qq 
           sudo apt-get -qq install vagrant=${{ env.VAGRANT_VERSION }}
 
-      - name: "Install Go"
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: 'false'
-
-      - name: "Install Go Test Summariser"
-        run: |
-          go install gotest.tools/gotestsum@v${{ env.GO_TEST_SUMMARISER_VERSION }}
-
       - name: "Start Vagrant box"
         working-directory: vagrant/proxmox-${{ matrix.proxmox_version }}
         run: |
           sudo vagrant up --no-tty
+#
+#      - name: "Load the Ubuntu ISO into the Vagrant box"
+#        working-directory: vagrant/proxmox-${{ matrix.proxmox_version }}
+#        run: |
+#          sudo vagrant ssh -c "sudo wget -q --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/${{ env.UBUNTU_VERSION }}/ubuntu-${{ env.UBUNTU_VERSION }}-live-server-amd64.iso"
 
-      - name: "Load the Ubuntu ISO into the Vagrant box"
-        working-directory: vagrant/proxmox-${{ matrix.proxmox_version }}
-        run: |
-          sudo vagrant ssh -c "sudo wget -q --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/${{ env.UBUNTU_VERSION }}/ubuntu-${{ env.UBUNTU_VERSION }}-live-server-amd64.iso"
-
-      - name: "Run tests"
-        working-directory: pkg
-        run: |
-          gotestsum --format testname
