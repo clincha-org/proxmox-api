@@ -16,8 +16,8 @@ Vagrant.configure("2") do |config|
   config.ssh.password = 'vagrant'
   config.ssh.insert_key = 'true'
 
-  config.vm.provision "file", source: "scripts/interfaces", destination: "/etc/network/interfaces"
-#   config.vm.provision "shell", path: "scripts/setup-bridge.sh"
+#   config.vm.provision "file", source: "scripts/interfaces", destination: "/etc/network/interfaces"
+  config.vm.provision "shell", path: "scripts/setup-bridge.sh"
 
 #   config.vm.synced_folder "./iso", "/var/lib/vz/template/iso"
 end

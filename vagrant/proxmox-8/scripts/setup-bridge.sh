@@ -12,5 +12,3 @@ echo "Host IP: $HOST_IP"
 #
 ## Apply the changes
 #pvesh set /nodes/pve/network
-
-
