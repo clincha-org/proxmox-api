@@ -43,6 +43,11 @@ jobs:
         run: |
           sudo vagrant ssh -c "sudo wget -q --content-disposition -P /var/lib/vz/template/iso https://releases.ubuntu.com/${{ env.UBUNTU_VERSION }}/ubuntu-${{ env.UBUNTU_VERSION }}-live-server-amd64.iso"
 
+      - name: "Initialize Packer"
+        working-directory: packer
+        run: |
+          packer init .
+
       - name: "Build template with Packer"
         working-directory: packer
         run: |
