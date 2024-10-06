@@ -54,7 +54,7 @@ source "proxmox-iso" "ubuntu2404" {
 
   ssh_host     = "127.0.0.1"
   ssh_port     = 2223
-  ssh_timeout  = "30m"
+  ssh_timeout  = "5m"
   ssh_username = "ansible"
   ssh_password = var.ssh_password
 }

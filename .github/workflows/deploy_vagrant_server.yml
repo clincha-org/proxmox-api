@@ -54,3 +54,12 @@ jobs:
           packer build \
           -var "ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
           .
+
+      - name: "Upload screen recording"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screen-recording
+          path: vagrant/proxmox-${{ matrix.proxmox_version }}/*.webm
+          if-no-files-found: 'warn'
+          compression-level: '9'
