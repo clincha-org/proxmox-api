@@ -56,6 +56,7 @@ jobs:
           .
 
       - name: "Change permissions of the recording"
+        if: always()
         run: |
           sudo chown $USER:$USER vagrant/proxmox-${{ matrix.proxmox_version }}/proxmox-ve-${{ matrix.proxmox_version }}-screen0.webm
 
