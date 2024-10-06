@@ -23,7 +23,7 @@ source "proxmox-iso" "ubuntu2404" {
 
   network_adapters {
     model  = "e1000"
-    bridge = "vmbr1"
+    bridge = "vmbr0"
   }
 
   disks {
