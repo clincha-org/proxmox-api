@@ -55,6 +55,10 @@ jobs:
           -var "ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
           .
 
+      - name: "Change permissions of the recording"
+        run: |
+          sudo chown -R $USER:$USER vagrant/proxmox-${{ matrix.proxmox_version }}
+
       - name: "Upload screen recording"
         if: always()
         uses: actions/upload-artifact@v4.4.0
