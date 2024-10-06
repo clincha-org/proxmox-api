@@ -47,5 +47,5 @@ jobs:
         working-directory: packer
         run: |
           packer build \
-          -var "ansible_ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
+          -var "ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
           .
