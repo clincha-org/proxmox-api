@@ -55,6 +55,7 @@ jobs:
           PACKER_LOG: 1
           PACKER_LOG_PATH: /tmp/logs/packer-proxmox-${{ matrix.proxmox_version }}.log
         run: |
+          mkdir /tmp/logs
           nohup packer build \
           -var "ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
           . &
