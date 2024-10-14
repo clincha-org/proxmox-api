@@ -47,16 +47,18 @@ source "proxmox-iso" "ubuntu2404" {
     "<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
     "e<wait>",
     "<down><down><down><end><left><left><left><left>",
-    "autoinstall",
+    "autoinstall console=ttyS0,115200",
     "<wait>",
     "<f10>",
   ]
 
   ssh_host     = "127.0.0.1"
   ssh_port     = 2223
-  ssh_timeout  = "1m"
+  ssh_timeout  = "20m"
   ssh_username = "ansible"
   ssh_password = var.ssh_password
+
+  serials = ["socket"]
 }
 
 build {

@@ -51,19 +51,24 @@ jobs:
 
       - name: "Build template with Packer"
         working-directory: packer
+        env:
+          PACKER_LOG: 1
+          PACKER_LOG_PATH: /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
         run: |
-          packer build \
+          nohup packer build \
           -var "ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
-          .
+          . &
+          sleep 10
+          cat /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
 
       - name: "Change permissions of the recording"
         if: always()
         run: |
-          sudo chown $USER:$USER vagrant/proxmox-${{ matrix.proxmox_version }}/proxmox-ve-${{ matrix.proxmox_version }}-screen0.webm
+          sudo chown $USER:$USER /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
 
       - name: "Upload screen recording"
         if: always()
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: screen-recording
-          path: vagrant/proxmox-${{ matrix.proxmox_version }}/proxmox-ve-${{ matrix.proxmox_version }}-screen0.webm
+          name: packer-proxmox-${{ matrix.proxmox_version }}.log
+          path: /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
