@@ -59,14 +59,15 @@ jobs:
           -var "ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
           . &
           sleep 10
-          cat /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
+          cd ../vagrant/proxmox-${{ matrix.proxmox_version }}
+          sudo vagrant ssh -c "sudo qm terminal 100"
 
-      - name: "Change permissions of the recording"
+      - name: "Change permissions of the log file"
         if: always()
         run: |
           sudo chown $USER:$USER /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
 
-      - name: "Upload screen recording"
+      - name: "Upload log file"
         if: always()
         uses: actions/upload-artifact@v4.4.0
         with:
