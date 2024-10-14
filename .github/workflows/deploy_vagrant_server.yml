@@ -53,26 +53,27 @@ jobs:
         working-directory: packer
         env:
           PACKER_LOG: 1
-          PACKER_LOG_PATH: /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
+          PACKER_LOG_PATH: /tmp/logs/packer-proxmox-${{ matrix.proxmox_version }}.log
         run: |
           nohup packer build \
           -var "ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
           . &
+          echo "Packer build started, sleeping."
           sleep 10
 
       - name: "Read the terminal output"
         working-directory: vagrant/proxmox-${{ matrix.proxmox_version }}
         run: |
-          sudo vagrant ssh -c "sudo qm terminal 100"
+          sudo vagrant ssh -c "sudo qm terminal 100" > /tmp/logs/packer-serial-${{ matrix.proxmox_version }}.log
 
-      - name: "Change permissions of the log file"
+      - name: "Change permissions of the log files"
         if: always()
         run: |
-          sudo chown $USER:$USER /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
+          sudo chown $USER:$USER /tmp/logs
 
-      - name: "Upload log file"
+      - name: "Upload log files"
         if: always()
         uses: actions/upload-artifact@v4.4.0
         with:
-          name: packer-proxmox-${{ matrix.proxmox_version }}.log
-          path: /tmp/packer-proxmox-${{ matrix.proxmox_version }}.log
+          name: packer-proxmox-${{ matrix.proxmox_version }} logs
+          path: /tmp/logs
