@@ -65,7 +65,7 @@ jobs:
       - name: "Read the terminal output"
         working-directory: vagrant/proxmox-${{ matrix.proxmox_version }}
         run: |
-          script -e -c sudo vagrant ssh -c "sudo qm terminal 100" > /tmp/logs/packer-serial-${{ matrix.proxmox_version }}.log
+          script -e -c "sudo vagrant ssh -c 'sudo qm terminal 100' > /tmp/logs/packer-serial-${{ matrix.proxmox_version }}.log"
 
       - name: "Change permissions of the log files"
         if: always()
