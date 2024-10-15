@@ -49,23 +49,30 @@ jobs:
         run: |
           packer init .
 
+      - name: "Create log directory"
+        run: |
+          mkdir /tmp/logs
+
       - name: "Build template with Packer"
         working-directory: packer
         env:
           PACKER_LOG: 1
           PACKER_LOG_PATH: /tmp/logs/packer-proxmox-${{ matrix.proxmox_version }}.log
         run: |
-          mkdir /tmp/logs
-          nohup packer build \
+          packer build \
           -var "ssh_password=${{ secrets.ANSIBLE_PASSWORD }}" \
-          . &
+          . \
+          > /tmp/logs/packer-proxmox-process-${{ matrix.proxmox_version }}.log \
+          &
           echo "Packer build started, sleeping."
           sleep 10
+          echo "Sleep concluded"
 
       - name: "Read the terminal output"
         working-directory: vagrant/proxmox-${{ matrix.proxmox_version }}
         run: |
-          script -e -c "sudo vagrant ssh -c 'sudo qm terminal 100' > /tmp/logs/packer-serial-${{ matrix.proxmox_version }}.log"
+          script -e -c "sudo vagrant ssh -c 'sudo qm status 100'"
+          script -e -c "sudo vagrant ssh -c 'sudo qm terminal 100'"
 
       - name: "Change permissions of the log files"
         if: always()
