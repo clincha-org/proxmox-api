@@ -70,7 +70,7 @@ jobs:
 
       - name: "Read the terminal output"
         working-directory: vagrant/proxmox-${{ matrix.proxmox_version }}
-        shell: 'script -q -e -c "bash {0}"'
+        shell: 'script -q -e -c "bash --noprofile --norc -eo pipefail {0}"'
         run: |
           sudo vagrant ssh -c 'sudo qm status 100'
           sudo vagrant ssh -c 'sudo qm terminal 100'
