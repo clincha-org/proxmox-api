@@ -69,13 +69,12 @@ jobs:
           echo "Sleep concluded"
 
       - name: "Start a container and read the terminal output"
-        uses: addnab/docker-run-action@v3
-        with:
-          image: ubuntu:24.04
-          options: -v /vagrant/proxmox-${{ matrix.proxmox_version }}:/mnt/proxmox-${{ matrix.proxmox_version }}
-          run: |
-            cd /mnt/proxmox-${{ matrix.proxmox_version }}
-            vagrant ssh -c 'sudo qm terminal 100'
+        working-directory: vagrant/proxmox-${{ matrix.proxmox_version }}
+        shell: 'script -q -e -c "bash --noprofile --norc -eo pipefail {0}"'
+        run: |
+          sudo vagrant ssh -c 'sudo qm status 100'
+          sudo vagrant ssh -c 'sudo qm terminal 100'
+          mv typescript /tmp/logs/vagrant-proxmox-${{ matrix.proxmox_version }}.log
 
       - name: "Change permissions of the log files"
         if: always()
