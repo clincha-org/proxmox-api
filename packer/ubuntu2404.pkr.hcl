@@ -23,7 +23,7 @@ source "proxmox-iso" "ubuntu2404" {
   memory  = 4096
 
   cpu_type = "host"
-  os  = "l26"
+  os       = "l26"
 
   network_adapters {
     model  = "e1000"
@@ -47,18 +47,18 @@ source "proxmox-iso" "ubuntu2404" {
   }
 
   boot_wait = "1s"
+  boot_key_interval = "5s"
   boot_command = [
-    "<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
-    "e<wait>",
-    "<down><down><down><end><left><left><left><left><wait5>",
+    "<spacebar><spacebar><spacebar><spacebar><spacebar>",
+    "e",
+    "<down><down><down><end><left><left><left><left>",
     "autoinstall console=ttyS0,115200",
-    "<wait>",
     "<f10>",
   ]
 
   ssh_host     = "127.0.0.1"
   ssh_port     = 2223
-  ssh_timeout  = "20m"
+  ssh_timeout  = "1h"
   ssh_username = "ansible"
   ssh_password = var.ssh_password
 
