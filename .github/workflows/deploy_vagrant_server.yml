@@ -19,6 +19,25 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v4
 
+      - name: "Establish WireGuard connection"
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install wireguard
+          
+          echo "[Interface]
+          PrivateKey = ${{ secrets.WIREGUARD_PRIVATE_KEY }}
+          Address = ${{ vars.WIREGUARD_IP }}
+          DNS = ${{ vars.WIREGUARD_DNS }}
+      
+          [Peer]
+          PublicKey = ${{ secrets.WIREGUARD_PUBLIC_KEY }}
+          PresharedKey = ${{ secrets.WIREGUARD_PRESHARED_KEY }}
+          Endpoint = ${{ vars.WIREGUARD_ENDPOINT }}
+          AllowedIPs = ${{ vars.WIREGUARD_ALLOWED_IPS }}
+          PersistentKeepalive = 25" | sudo tee /etc/wireguard/wg0.conf
+      
+          sudo wg-quick up wg0
+
       - name: "Install VirtualBox"
         run: |
           wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor -o /usr/share/keyrings/oracle-virtualbox-2016.gpg
