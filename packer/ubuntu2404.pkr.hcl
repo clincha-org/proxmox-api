@@ -19,7 +19,7 @@ source "proxmox-iso" "ubuntu2404" {
 
   node    = "pve"
   sockets = 1
-  cores   = 1
+  cores   = 2
   memory  = 4096
 
   cpu_type = "host"
@@ -53,12 +53,12 @@ source "proxmox-iso" "ubuntu2404" {
   }
 
   boot_wait         = "1s"
-#   boot_key_interval = "3s"
+  boot_key_interval = "3s"
   boot_command = [
     "<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
     "e<wait>",
     "<down><down><down><end><left><left><left><left><wait5>",
-    "autoinstall console=ttyS0,115200",
+    "autoinstall",
     "<wait>",
     "<f10>",
   ]
