@@ -22,6 +22,9 @@ source "proxmox-iso" "ubuntu2404" {
   cores   = 4
   memory  = 4096
 
+  cpu_type = "host"
+  os_type  = "l26"
+
   network_adapters {
     model  = "e1000"
     bridge = "vmbr0"
