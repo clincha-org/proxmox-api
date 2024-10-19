@@ -19,7 +19,7 @@ source "proxmox-iso" "ubuntu2404" {
 
   node    = "pve"
   sockets = 1
-  cores   = 2
+  cores   = 1
   memory  = 4096
 
   cpu_type = "host"
