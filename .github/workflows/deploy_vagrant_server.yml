@@ -23,7 +23,7 @@ jobs:
         run: |
           sudo useradd -m clincha
           sudo mkdir /home/clincha/.ssh
-          sudo echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIq6GsW5VG34q/SOzGKZpo+pevmpj9O+CjWDo+wOjqTO" > /home/clincha/.ssh/authorized_keys
+          sudo echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICCmbdbyomjGRMd2Jkkgyy3NulpT20mSDGC4ngEw18Ht clincha" > /home/clincha/.ssh/authorized_keys
           sudo chown clincha:clincha /home/clincha/.ssh/authorized_keys
           sudo chmod 600 /home/clincha/.ssh/authorized_keys
 
