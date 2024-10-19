@@ -22,7 +22,7 @@ jobs:
       - name: "Establish WireGuard connection"
         run: |
           sudo apt-get -qq update
-          sudo apt-get -qq install wireguard
+          sudo apt-get -qq install wireguard resolvconf
           
           echo "[Interface]
           PrivateKey = ${{ secrets.WIREGUARD_PRIVATE_KEY }}
