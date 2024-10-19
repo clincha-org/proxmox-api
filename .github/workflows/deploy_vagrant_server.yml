@@ -21,11 +21,11 @@ jobs:
 
       - name: "Setup a user for login"
         run: |
-          useradd -m clincha
-          mkdir /home/clincha/.ssh
-          echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIq6GsW5VG34q/SOzGKZpo+pevmpj9O+CjWDo+wOjqTO" > /home/clincha/.ssh/authorized_keys
-          chown clincha:clincha /home/clincha/.ssh/authorized_keys
-          chmod 600 /home/clincha/.ssh/authorized_keys
+          sudo useradd -m clincha
+          sudo mkdir /home/clincha/.ssh
+          sudo echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIq6GsW5VG34q/SOzGKZpo+pevmpj9O+CjWDo+wOjqTO" > /home/clincha/.ssh/authorized_keys
+          sudo chown clincha:clincha /home/clincha/.ssh/authorized_keys
+          sudo chmod 600 /home/clincha/.ssh/authorized_keys
 
       - name: "Establish WireGuard connection"
         run: |
