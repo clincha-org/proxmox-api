@@ -19,7 +19,7 @@ source "proxmox-iso" "ubuntu2404" {
 
   node    = "pve"
   sockets = 1
-  cores   = 2
+  cores   = 1
   memory  = 4096
 
   network_adapters {
@@ -55,7 +55,7 @@ source "proxmox-iso" "ubuntu2404" {
 
   ssh_host     = "127.0.0.1"
   ssh_port     = 2223
-  ssh_timeout  = "1h"
+  ssh_timeout  = "20m"
   ssh_username = "ansible"
   ssh_password = var.ssh_password
 
