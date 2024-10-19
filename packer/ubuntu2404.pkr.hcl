@@ -24,6 +24,12 @@ source "proxmox-iso" "ubuntu2404" {
 
   cpu_type = "host"
   os       = "l26"
+  numa     = true
+
+  vga {
+    type = "virtio"
+    memory = 32
+  }
 
   network_adapters {
     model  = "e1000"
@@ -46,8 +52,8 @@ source "proxmox-iso" "ubuntu2404" {
     unmount          = true
   }
 
-  boot_wait = "1s"
-  boot_key_interval = "3s"
+  boot_wait         = "1s"
+#   boot_key_interval = "3s"
   boot_command = [
     "<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
     "e<wait>",
