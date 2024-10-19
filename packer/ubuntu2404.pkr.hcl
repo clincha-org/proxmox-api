@@ -23,7 +23,7 @@ source "proxmox-iso" "ubuntu2404" {
   memory  = 4096
 
   cpu_type = "host"
-  os_type  = "l26"
+  os  = "l26"
 
   network_adapters {
     model  = "e1000"
