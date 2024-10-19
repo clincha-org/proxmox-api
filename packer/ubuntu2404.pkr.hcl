@@ -47,12 +47,13 @@ source "proxmox-iso" "ubuntu2404" {
   }
 
   boot_wait = "1s"
-  boot_key_interval = "5s"
+  boot_key_interval = "3s"
   boot_command = [
-    "<spacebar><spacebar><spacebar><spacebar><spacebar>",
-    "e",
-    "<down><down><down><end><left><left><left><left>",
+    "<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
+    "e<wait>",
+    "<down><down><down><end><left><left><left><left><wait5>",
     "autoinstall console=ttyS0,115200",
+    "<wait>",
     "<f10>",
   ]
 
