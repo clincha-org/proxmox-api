@@ -17,9 +17,10 @@ source "proxmox-iso" "ubuntu2404" {
   iso_checksum = "sha256:e240e4b801f7bb68c20d1356b60968ad0c33a41d00d828e74ceb3364a0317be9"
   unmount_iso  = true
 
-  node   = "pve"
-  cores  = 2
-  memory = 4096
+  node    = "pve"
+  sockets = 1
+  cores   = 2
+  memory  = 4096
 
   network_adapters {
     model  = "e1000"
@@ -54,7 +55,7 @@ source "proxmox-iso" "ubuntu2404" {
 
   ssh_host     = "127.0.0.1"
   ssh_port     = 2223
-  ssh_timeout  = "10m"
+  ssh_timeout  = "1h"
   ssh_username = "ansible"
   ssh_password = var.ssh_password
 
