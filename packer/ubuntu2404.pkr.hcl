@@ -47,7 +47,7 @@ source "proxmox-iso" "ubuntu2404" {
   boot_command = [
     "<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
     "e<wait>",
-    "<down><down><down><end><left><left><left><left>",
+    "<down><down><down><end><left><left><left><left><wait5>",
     "autoinstall console=ttyS0,115200",
     "<wait>",
     "<f10>",
