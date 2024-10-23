@@ -28,6 +28,11 @@ type VirtualMachineRequest struct {
 	Delete       *string `json:"delete,omitempty"`
 }
 
+type VirtualMachineCloneRequest struct {
+	NewID     int64 `json:"newid"`
+	FullClone *bool `json:"full,omitempty"`
+}
+
 type VirtualMachinesResponse struct {
 	Data []VirtualMachineListItem `json:"data"`
 }

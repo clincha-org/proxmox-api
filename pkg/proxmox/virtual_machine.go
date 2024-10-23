@@ -150,6 +150,38 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 	return client.GetVM(node, vm.ID)
 }
 
+func (client *Client) CloneVM(node string, vm *VirtualMachine, clone int64, full bool) (VirtualMachine, error) {
+	cloneRequest := VirtualMachineCloneRequest{
+		NewID:     vm.ID,
+		FullClone: &full,
+	}
+
+	slog.Debug("api-request", "method", "CloneVM", "node", node, "request", cloneRequest)
+	requestBody, err := json.Marshal(cloneRequest)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CloneVM-marshal-request: %w", err)
+	}
+
+	path := client.Host + ApiPath + NodesPath + "/" + node + VirtualMachinePath + "/" + strconv.FormatInt(clone, 10) + "/clone"
+	body, err := client.MakeRESTRequest("POST", path, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CloneVM-make-request: %w", err)
+	}
+
+	// Make sure the VM has finished cloning
+	job := AsynchronousTaskResponse{}
+	err = json.Unmarshal(body, &job)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CloneVM-unmarshal-response: %w", err)
+	}
+	err = client.AwaitAsynchronousTask(node, job.ID)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CloneVM-await-task: %w", err)
+	}
+
+	return client.GetVM(node, vm.ID)
+}
+
 func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine, error) {
 	vmRequest := VirtualMachineRequest{
 		ID:           vm.ID,
