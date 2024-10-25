@@ -10,16 +10,19 @@ func Unmarshal(id int64, data string, storage *InternalDataStorage) error {
 	if data == "" {
 		return nil
 	}
-	commaSeparated := strings.Split(data, ",")
 
 	slog.Debug("ide-unmarshal", "method", "Unmarshal", "data", data)
 
 	storage.ID = id
 
-	storage.Storage = strings.Split(commaSeparated[0], ":")[0]
-	storage.Path = &strings.Split(commaSeparated[0], ":")[1]
+	IDEFields := strings.Split(data, ",")
 
-	for _, value := range commaSeparated[1:] {
+	if IDEFields[0] != "none" {
+		storage.Storage = strings.Split(IDEFields[0], ":")[0]
+		storage.Path = &strings.Split(IDEFields[0], ":")[1]
+	}
+
+	for _, value := range IDEFields[1:] {
 		keyValue := strings.Split(value, "=")
 		switch keyValue[0] {
 		case "media":
