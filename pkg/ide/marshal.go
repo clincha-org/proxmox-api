@@ -44,10 +44,6 @@ func Marshal(storage *InternalDataStorage) (string, error) {
 		return "", fmt.Errorf("invalid ID for IDE device: %v", storage.ID)
 	}
 
-	if storage.Storage == nil {
-		return "", fmt.Errorf("storage is required for IDE device: %v", storage.ID)
-	}
-
 	var data string
 	// Handle special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume. See Proxmox API documentation.
 	if storage.Path == nil && storage.Size != nil && *storage.Size != "" {
