@@ -8,7 +8,7 @@ type VirtualMachine struct {
 	ID           int64                      `json:"vmid"`
 	IDEDevices   *[]ide.InternalDataStorage `json:"-"`
 	SCSI1        *string                    `json:"scsi1"`
-	Net1         *string                    `json:"net1"`
+	Net0         *string                    `json:"net0"`
 	SCSIHardware *string                    `json:"scsihw"`
 	Cores        int64                      `json:"cores"`
 	Memory       int64                      `json:"memory"`
@@ -21,7 +21,7 @@ type VirtualMachineRequest struct {
 	IDE2         *string `json:"ide2,omitempty"`
 	IDE3         *string `json:"ide3,omitempty"`
 	SCSI1        *string `json:"scsi1,omitempty"`
-	Net1         *string `json:"net1,omitempty"`
+	Net0         *string `json:"net0,omitempty"`
 	SCSIHardware *string `json:"scsihw,omitempty"`
 	Cores        int64   `json:"cores,omitempty"`
 	Memory       int64   `json:"memory,omitempty"`
@@ -94,7 +94,7 @@ type VirtualMachineConfig struct {
 	Numa    int64   `json:"numa,string"`
 	Smbios1 string  `json:"smbios1"`
 	Vmgenid string  `json:"vmgenid"`
-	Net1    string  `json:"net1"`
+	Net0    string  `json:"net0"`
 	Ostype  string  `json:"ostype"`
 	Scsi0   string  `json:"scsi0"`
 	Digest  string  `json:"digest"`

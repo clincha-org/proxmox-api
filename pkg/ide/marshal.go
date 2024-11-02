@@ -36,6 +36,8 @@ func Unmarshal(id int64, data string, storage *InternalDataStorage) error {
 
 func Marshal(storage *InternalDataStorage) (string, error) {
 
+	slog.Debug("ide-marshal", "method", "Marshal", "storage", storage)
+
 	if storage == nil {
 		return "", fmt.Errorf("cannot marshal into nil InternalDataStorage object")
 	}
@@ -44,7 +46,6 @@ func Marshal(storage *InternalDataStorage) (string, error) {
 		return "", fmt.Errorf("invalid ID for IDE device: %v", storage.ID)
 	}
 
-	var data string
 	// Handle special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume. See Proxmox API documentation.
 	if storage.Path == nil && storage.Storage != nil && *storage.Storage != "" && storage.Size != nil && *storage.Size != "" {
 		// Remove the trailing "G" from the size
@@ -55,12 +56,14 @@ func Marshal(storage *InternalDataStorage) (string, error) {
 		return *storage.Storage + ":" + *storage.Size, nil
 	}
 
-	if storage.Storage == nil || *storage.Storage == "" {
-		emptyStorageString := "none"
-		storage.Storage = &emptyStorageString
+	// Handle empty storage media
+	if storage.Path == nil && storage.Storage == nil && storage.Media != nil && *storage.Media != "" {
+		slog.Debug("ide-marshal", "method", "Marshal", "empty storage media", *storage.Media)
+
+		return "none,media=" + *storage.Media, nil
 	}
 
-	data = *storage.Storage + ":" + *storage.Path
+	data := *storage.Storage + ":" + *storage.Path
 
 	if storage.Media != nil && *storage.Media != "" {
 		data += ",media=" + *storage.Media

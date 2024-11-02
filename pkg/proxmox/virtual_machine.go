@@ -35,7 +35,7 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 
 	vm := VirtualMachine{
 		ID:           id,
-		Net1:         &vmModel.Data.Net1,
+		Net0:         &vmModel.Data.Net0,
 		SCSIHardware: &vmModel.Data.Scsihw,
 		Cores:        vmModel.Data.Cores,
 		Memory:       vmModel.Data.Memory,
@@ -81,7 +81,7 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 	vmRequest := VirtualMachineRequest{
 		ID:           vm.ID,
 		SCSI1:        vm.SCSI1,
-		Net1:         vm.Net1,
+		Net0:         vm.Net0,
 		SCSIHardware: vm.SCSIHardware,
 		Cores:        vm.Cores,
 		Memory:       vm.Memory,
@@ -186,7 +186,7 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 	vmRequest := VirtualMachineRequest{
 		ID:           vm.ID,
 		SCSI1:        vm.SCSI1,
-		Net1:         vm.Net1,
+		Net0:         vm.Net0,
 		SCSIHardware: vm.SCSIHardware,
 		Cores:        vm.Cores,
 		Memory:       vm.Memory,

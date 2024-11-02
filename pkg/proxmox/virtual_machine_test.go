@@ -35,7 +35,7 @@ func TestGetVM(t *testing.T) {
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
-	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	cores := int64(1)
 	memory := int64(2048)
@@ -44,7 +44,7 @@ func TestGetVM(t *testing.T) {
 		ID:           102,
 		IDEDevices:   &[]ide.InternalDataStorage{cdrom},
 		SCSI1:        &scsi1,
-		Net1:         &net1,
+		Net0:         &net0,
 		SCSIHardware: &scsiHardware,
 		Cores:        cores,
 		Memory:       memory,
@@ -92,7 +92,7 @@ func TestCreateVM(t *testing.T) {
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
-	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	cores := int64(1)
 	memory := int64(2048)
@@ -101,7 +101,7 @@ func TestCreateVM(t *testing.T) {
 		ID:           102,
 		IDEDevices:   &[]ide.InternalDataStorage{cdrom},
 		SCSI1:        &scsi1,
-		Net1:         &net1,
+		Net0:         &net0,
 		SCSIHardware: &scsiHardware,
 		Cores:        cores,
 		Memory:       memory,
@@ -143,7 +143,7 @@ func TestCreateVMWithStart(t *testing.T) {
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
-	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	cores := int64(1)
 	memory := int64(2048)
@@ -152,7 +152,7 @@ func TestCreateVMWithStart(t *testing.T) {
 		ID:           102,
 		IDEDevices:   &[]ide.InternalDataStorage{cdrom},
 		SCSI1:        &scsi1,
-		Net1:         &net1,
+		Net0:         &net0,
 		SCSIHardware: &scsiHardware,
 		Cores:        cores,
 		Memory:       memory,
@@ -197,13 +197,13 @@ func TestUpdateVM(t *testing.T) {
 		Size:    &newDiskSize,
 	}
 	scsi1 := "local-lvm:8"
-	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	vm := VirtualMachine{
 		ID:           102,
 		IDEDevices:   &[]ide.InternalDataStorage{cdrom, ide1},
 		SCSI1:        &scsi1,
-		Net1:         &net1,
+		Net0:         &net0,
 		SCSIHardware: &scsiHardware,
 		Cores:        1,
 		Memory:       2048,
@@ -229,7 +229,7 @@ func TestUpdateVM(t *testing.T) {
 	}
 
 	vm.Memory = 1024
-	vm.Net1 = nil
+	vm.Net0 = nil
 	vm.SCSI1 = nil
 
 	vm, err = client.UpdateVM("pve", &vm)
@@ -271,13 +271,13 @@ func TestIDERemoval(t *testing.T) {
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
-	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	vm := VirtualMachine{
 		ID:           102,
 		IDEDevices:   &[]ide.InternalDataStorage{cdrom, ide1},
 		SCSI1:        &scsi1,
-		Net1:         &net1,
+		Net0:         &net0,
 		SCSIHardware: &scsiHardware,
 		Cores:        1,
 		Memory:       2048,
@@ -318,12 +318,12 @@ func TestCreateVMWithNoIDEDevices(t *testing.T) {
 	}
 
 	scsi1 := "local-lvm:8"
-	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	vm := VirtualMachine{
 		ID:           102,
 		SCSI1:        &scsi1,
-		Net1:         &net1,
+		Net0:         &net0,
 		SCSIHardware: &scsiHardware,
 		Cores:        1,
 		Memory:       2048,
@@ -367,13 +367,13 @@ func TestRemoveAllIDEDevices(t *testing.T) {
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
-	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	vm := VirtualMachine{
 		ID:           102,
 		IDEDevices:   &[]ide.InternalDataStorage{cdrom, ide1},
 		SCSI1:        &scsi1,
-		Net1:         &net1,
+		Net0:         &net0,
 		SCSIHardware: &scsiHardware,
 		Cores:        1,
 		Memory:       2048,
@@ -429,13 +429,13 @@ func TestClone(t *testing.T) {
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
-	net1 := "model=virtio,bridge=vmbr0,firewall=1"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
 	scsiHardware := "virtio-scsi-pci"
 	vm := VirtualMachine{
 		ID:           103,
 		IDEDevices:   &[]ide.InternalDataStorage{cdrom, ide1},
 		SCSI1:        &scsi1,
-		Net1:         &net1,
+		Net0:         &net0,
 		SCSIHardware: &scsiHardware,
 		Cores:        1,
 		Memory:       2048,
@@ -449,6 +449,7 @@ func TestClone(t *testing.T) {
 		}
 	})
 
+	vm, err = client.UpdateVM("pve", &vm)
 	if err != nil {
 		t.Fatal(err)
 	}
