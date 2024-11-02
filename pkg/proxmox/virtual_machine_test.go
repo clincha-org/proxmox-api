@@ -28,9 +28,10 @@ func TestGetVM(t *testing.T) {
 	}
 
 	isoPath := "iso/" + UbuntuTestIso
+	storage := "local"
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
-		Storage: "local",
+		Storage: &storage,
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
@@ -84,9 +85,10 @@ func TestCreateVM(t *testing.T) {
 	}
 
 	isoPath := "iso/" + UbuntuTestIso
+	storage := "local"
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
-		Storage: "local",
+		Storage: &storage,
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
@@ -134,9 +136,10 @@ func TestCreateVMWithStart(t *testing.T) {
 	}
 
 	isoPath := "iso/" + UbuntuTestIso
+	storage := "local"
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
-		Storage: "local",
+		Storage: &storage,
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
@@ -180,15 +183,17 @@ func TestUpdateVM(t *testing.T) {
 	}
 
 	isoPath := "iso/" + UbuntuTestIso
+	storage := "local"
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
-		Storage: "local",
+		Storage: &storage,
 		Path:    &isoPath,
 	}
 	newDiskSize := "4"
+	newDiskStorage := "local-lvm"
 	ide1 := ide.InternalDataStorage{
 		ID:      1,
-		Storage: "local-lvm",
+		Storage: &newDiskStorage,
 		Size:    &newDiskSize,
 	}
 	scsi1 := "local-lvm:8"
@@ -253,14 +258,16 @@ func TestIDERemoval(t *testing.T) {
 
 	isoPath := "iso/" + UbuntuTestIso
 	size := "4"
+	diskStorage := "local-lvm"
 	ide1 := ide.InternalDataStorage{
 		ID:      1,
-		Storage: "local-lvm",
+		Storage: &diskStorage,
 		Size:    &size,
 	}
+	cdromStorage := "local"
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
-		Storage: "local",
+		Storage: &cdromStorage,
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"
@@ -347,14 +354,16 @@ func TestRemoveAllIDEDevices(t *testing.T) {
 
 	isoPath := "iso/" + UbuntuTestIso
 	size := "4"
+	diskStorage := "local-lvm"
 	ide1 := ide.InternalDataStorage{
 		ID:      1,
-		Storage: "local-lvm",
+		Storage: &diskStorage,
 		Size:    &size,
 	}
+	cdromStorage := "local"
 	cdrom := ide.InternalDataStorage{
 		ID:      2,
-		Storage: "local",
+		Storage: &cdromStorage,
 		Path:    &isoPath,
 	}
 	scsi1 := "local-lvm:8"

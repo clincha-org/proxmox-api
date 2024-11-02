@@ -18,7 +18,7 @@ func Unmarshal(id int64, data string, storage *InternalDataStorage) error {
 	IDEFields := strings.Split(data, ",")
 
 	if IDEFields[0] != "none" {
-		storage.Storage = strings.Split(IDEFields[0], ":")[0]
+		storage.Storage = &strings.Split(IDEFields[0], ":")[0]
 		storage.Path = &strings.Split(IDEFields[0], ":")[1]
 	}
 
@@ -44,7 +44,7 @@ func Marshal(storage *InternalDataStorage) (string, error) {
 		return "", fmt.Errorf("invalid ID for IDE device: %v", storage.ID)
 	}
 
-	if storage.Storage == "" {
+	if storage.Storage == nil {
 		return "", fmt.Errorf("storage is required for IDE device: %v", storage.ID)
 	}
 
@@ -54,12 +54,12 @@ func Marshal(storage *InternalDataStorage) (string, error) {
 		// Remove the trailing "G" from the size
 		*storage.Size = strings.TrimSuffix(*storage.Size, "G")
 
-		slog.Debug("ide-marshal", "method", "Marshal", "new volume", storage.Storage+":"+*storage.Size)
+		slog.Debug("ide-marshal", "method", "Marshal", "new volume", *storage.Storage+":"+*storage.Size)
 
-		return storage.Storage + ":" + *storage.Size, nil
+		return *storage.Storage + ":" + *storage.Size, nil
 	}
 
-	data = storage.Storage + ":" + *storage.Path
+	data = *storage.Storage + ":" + *storage.Path
 
 	if storage.Media != nil && *storage.Media != "" {
 		data += ",media=" + *storage.Media
