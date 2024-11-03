@@ -151,3 +151,22 @@ func (client *Client) MakeRESTRequest(method string, path string, body *bytes.Bu
 
 	return responseBody, nil
 }
+
+func (client *Client) GetVersion() (VersionData, error) {
+	path := client.Host + ApiPath + "version"
+	body, err := client.MakeRESTRequest("GET", path, nil)
+	if err != nil {
+		return VersionData{}, fmt.Errorf("GetVersion-make-request: %w", err)
+	}
+
+	version := VersionResponse{}
+	err = json.Unmarshal(body, &version)
+	if err != nil {
+		return VersionData{}, fmt.Errorf("GetVersion-unmarshal-response: %w", err)
+	}
+
+	version.Data.MajorVersion = strings.Split(version.Data.Release, ".")[0]
+	slog.Debug("api-response", "method", "GetVersion", "MajorVersion", version.Data.MajorVersion)
+
+	return version.Data, nil
+}

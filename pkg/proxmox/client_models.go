@@ -63,3 +63,15 @@ type Ticket struct {
 		} `json:"cap"`
 	} `json:"data"`
 }
+
+type VersionResponse struct {
+	Data VersionData `json:"data"`
+}
+
+type VersionData struct {
+	Release      string `json:"release"`
+	RepoID       string `json:"repoid"`
+	MajorVersion string `json:"-"`
+	Version      string `json:"version"`
+	Console      string `json:"console"`
+}

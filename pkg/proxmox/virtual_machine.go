@@ -36,7 +36,17 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 	var tags []string
 	if vmModel.Data.Tags != nil {
 		slog.Debug("tags", "method", "GetVM", "tags", *vmModel.Data.Tags)
-		tags = strings.Split(*vmModel.Data.Tags, ",")
+
+		version, err := client.GetVersion()
+		if err != nil {
+			return VirtualMachine{}, fmt.Errorf("GetVM-get-pve-version: %w", err)
+		}
+
+		if version.MajorVersion == "7" {
+			tags = strings.Split(*vmModel.Data.Tags, "\u0000")
+		} else {
+			tags = strings.Split(*vmModel.Data.Tags, ",")
+		}
 	}
 
 	vm := VirtualMachine{
