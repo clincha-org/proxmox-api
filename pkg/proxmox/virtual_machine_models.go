@@ -12,20 +12,22 @@ type VirtualMachine struct {
 	SCSIHardware *string                    `json:"scsihw"`
 	Cores        int64                      `json:"cores"`
 	Memory       int64                      `json:"memory"`
+	Tags         *[]string                  `json:"tags"`
 }
 
 type VirtualMachineRequest struct {
-	ID           int64   `json:"vmid"`
-	IDE0         *string `json:"ide0,omitempty"`
-	IDE1         *string `json:"ide1,omitempty"`
-	IDE2         *string `json:"ide2,omitempty"`
-	IDE3         *string `json:"ide3,omitempty"`
-	SCSI1        *string `json:"scsi1,omitempty"`
-	Net0         *string `json:"net0,omitempty"`
-	SCSIHardware *string `json:"scsihw,omitempty"`
-	Cores        int64   `json:"cores,omitempty"`
-	Memory       int64   `json:"memory,omitempty"`
-	Delete       *string `json:"delete,omitempty"`
+	ID           int64     `json:"vmid"`
+	IDE0         *string   `json:"ide0,omitempty"`
+	IDE1         *string   `json:"ide1,omitempty"`
+	IDE2         *string   `json:"ide2,omitempty"`
+	IDE3         *string   `json:"ide3,omitempty"`
+	SCSI1        *string   `json:"scsi1,omitempty"`
+	Net0         *string   `json:"net0,omitempty"`
+	SCSIHardware *string   `json:"scsihw,omitempty"`
+	Cores        int64     `json:"cores,omitempty"`
+	Memory       int64     `json:"memory,omitempty"`
+	Delete       *string   `json:"delete,omitempty"`
+	Tags         *[]string `json:"tags,omitempty"`
 }
 
 type VirtualMachineCloneRequest struct {
@@ -100,4 +102,5 @@ type VirtualMachineConfig struct {
 	Digest  string  `json:"digest"`
 	Scsihw  string  `json:"scsihw"`
 	Memory  int64   `json:"memory,string"`
+	Tags    *string `json:"tags,omitempty"`
 }

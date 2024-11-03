@@ -454,3 +454,79 @@ func TestClone(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestTags(t *testing.T) {
+	client, err := NewClient(DefaultHostURL, TestUsername, TestPassword, slog.LevelDebug)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	isoPath := "iso/" + UbuntuTestIso
+	storage := "local"
+	cdrom := ide.InternalDataStorage{
+		ID:      2,
+		Storage: &storage,
+		Path:    &isoPath,
+	}
+	scsi1 := "local-lvm:8"
+	net0 := "model=virtio,bridge=vmbr0,firewall=1"
+	scsiHardware := "virtio-scsi-pci"
+	cores := int64(1)
+	memory := int64(2048)
+	tags := []string{"tag1", "tag2"}
+
+	request := VirtualMachine{
+		ID:           102,
+		IDEDevices:   &[]ide.InternalDataStorage{cdrom},
+		SCSI1:        &scsi1,
+		Net0:         &net0,
+		SCSIHardware: &scsiHardware,
+		Cores:        cores,
+		Memory:       memory,
+		Tags:         &tags,
+	}
+
+	vm, err := client.CreateVM("pve", &request, false)
+	t.Cleanup(func() {
+		err := client.DeleteVM("pve", 102)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if vm.Tags == nil {
+		t.Errorf("Expected tags, got %v", vm.Tags)
+	}
+
+	if len(*vm.Tags) != 2 {
+		t.Errorf("Expected 2 tags, got %d", len(*vm.Tags))
+	}
+
+	if (*vm.Tags)[0] != "tag1" {
+		t.Errorf("Expected tag1, got %s", (*vm.Tags)[0])
+	}
+
+	if (*vm.Tags)[1] != "tag2" {
+		t.Errorf("Expected tag2, got %s", (*vm.Tags)[1])
+	}
+
+	vm.Tags = &[]string{"tag3"}
+
+	vm, err = client.UpdateVM("pve", &vm)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(*vm.Tags) != 1 {
+		t.Errorf("Expected 1 tag, got %d", len(*vm.Tags))
+	}
+
+	if (*vm.Tags)[0] != "tag3" {
+		t.Errorf("Expected tag3, got %s", (*vm.Tags)[0])
+	}
+
+}

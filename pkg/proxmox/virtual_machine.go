@@ -33,12 +33,19 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 		return VirtualMachine{}, fmt.Errorf("GetVM-unmarshal-response: %w", err)
 	}
 
+	var tags []string
+	if vmModel.Data.Tags != nil {
+		slog.Debug("tags", "method", "GetVM", "tags", *vmModel.Data.Tags)
+		tags = strings.Split(*vmModel.Data.Tags, ",")
+	}
+
 	vm := VirtualMachine{
 		ID:           id,
 		Net0:         &vmModel.Data.Net0,
 		SCSIHardware: &vmModel.Data.Scsihw,
 		Cores:        vmModel.Data.Cores,
 		Memory:       vmModel.Data.Memory,
+		Tags:         &tags,
 	}
 
 	if vmModel.Data.IDE0 != nil || vmModel.Data.IDE1 != nil || vmModel.Data.IDE2 != nil || vmModel.Data.IDE3 != nil {
@@ -85,6 +92,7 @@ func (client *Client) CreateVM(node string, vm *VirtualMachine, start bool) (Vir
 		SCSIHardware: vm.SCSIHardware,
 		Cores:        vm.Cores,
 		Memory:       vm.Memory,
+		Tags:         vm.Tags,
 	}
 
 	if vm.IDEDevices != nil {
@@ -190,6 +198,7 @@ func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine,
 		SCSIHardware: vm.SCSIHardware,
 		Cores:        vm.Cores,
 		Memory:       vm.Memory,
+		Tags:         vm.Tags,
 	}
 
 	currentState, err := client.GetVM(node, vm.ID)
