@@ -34,6 +34,7 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 	}
 
 	var tags []string
+	var parent int64
 	if vmModel.Data.Tags != nil {
 		slog.Debug("tags", "method", "GetVM", "tags", *vmModel.Data.Tags)
 
@@ -47,6 +48,19 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 		} else {
 			tags = strings.Split(*vmModel.Data.Tags, ",")
 		}
+
+		// Check to see if we have a special tag that tracks the parent (clone) of the VM
+		for _, tag := range tags {
+			regex := regexp.MustCompile(`^tf-parent-(\d+)$`)
+			if regex.MatchString(tag) {
+				groups := regex.FindStringSubmatch(tag)
+				parent, err = strconv.ParseInt(groups[1], 10, 64)
+				if err != nil {
+					return VirtualMachine{}, fmt.Errorf("GetVM-parse-parent: %w", err)
+				}
+				slog.Debug("parent", "method", "GetVM", "parent", parent)
+			}
+		}
 	}
 
 	vm := VirtualMachine{
@@ -56,6 +70,7 @@ func (client *Client) GetVM(node string, id int64) (VirtualMachine, error) {
 		Cores:        vmModel.Data.Cores,
 		Memory:       vmModel.Data.Memory,
 		Tags:         &tags,
+		Parent:       &parent,
 	}
 
 	if vmModel.Data.IDE0 != nil || vmModel.Data.IDE1 != nil || vmModel.Data.IDE2 != nil || vmModel.Data.IDE3 != nil {
@@ -197,7 +212,15 @@ func (client *Client) CloneVM(node string, vm *VirtualMachine, clone int64, full
 		return VirtualMachine{}, fmt.Errorf("CloneVM-await-task: %w", err)
 	}
 
-	return client.GetVM(node, vm.ID)
+	CreatedVM, err := client.GetVM(node, vm.ID)
+	if err != nil {
+		return VirtualMachine{}, fmt.Errorf("CloneVM-get-vm: %w", err)
+	}
+
+	// Add a tag to the new VM to track the parent (clone) VM
+	tag := fmt.Sprintf("tf-parent-%d", clone)
+	*CreatedVM.Tags = append(*CreatedVM.Tags, tag)
+	return client.UpdateVM(node, &CreatedVM)
 }
 
 func (client *Client) UpdateVM(node string, vm *VirtualMachine) (VirtualMachine, error) {

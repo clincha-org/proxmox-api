@@ -13,6 +13,7 @@ type VirtualMachine struct {
 	Cores        int64                      `json:"cores"`
 	Memory       int64                      `json:"memory"`
 	Tags         *[]string                  `json:"tags"`
+	Parent       *int64                     `json:"-"`
 }
 
 type VirtualMachineRequest struct {
